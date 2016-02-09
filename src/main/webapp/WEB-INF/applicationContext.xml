@@ -17,12 +17,12 @@
   <context:annotation-config />
 
   <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
-    <mvc:message-converters register-defaults="false">   <!-- defaults for spring mvc 4 are jaxb and jackson2 -->
+    <mvc:message-converters register-defaults="true">   <!-- defaults for spring mvc 4 are jaxb and jackson2 -->
       <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
-      <bean class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-        <property name="marshaller" ref="xstreamMarshaller" />
-        <property name="unmarshaller" ref="xstreamMarshaller" />
-      </bean>
+      <!--<bean class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">-->
+        <!--<property name="marshaller" ref="xstreamMarshaller" />-->
+        <!--<property name="unmarshaller" ref="xstreamMarshaller" />-->
+      <!--</bean>-->
     </mvc:message-converters>
   </mvc:annotation-driven>
 
@@ -30,14 +30,14 @@
   <context:component-scan base-package="com.epam" />
 
 
-  <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
-    <property name="autodetectAnnotations" value="true" />
-    <property name="aliases">
-      <props>
-        <prop key="books">com.epam.search.domain.SearchResult</prop>
-      </props>
-    </property>
-  </bean>
+  <!--<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">-->
+    <!--<property name="autodetectAnnotations" value="true" />-->
+    <!--<property name="aliases">-->
+      <!--<props>-->
+        <!--<prop key="books">com.epam.search.domain.SearchResult</prop>-->
+      <!--</props>-->
+    <!--</property>-->
+  <!--</bean>-->
 
 
   <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
@@ -47,7 +47,6 @@
     <property name="mediaTypes" >
       <value>
         json=application/json
-        xml=application/xml
       </value>
     </property>
   </bean>

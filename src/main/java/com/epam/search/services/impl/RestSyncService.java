@@ -1,9 +1,8 @@
 package com.epam.search.services.impl;
 
+import com.epam.search.common.JsonHelper;
 import com.epam.search.domain.EventsPage;
 import com.epam.search.services.SyncService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.internal.NotNull;
 import java.io.File;
 import java.io.IOException;
@@ -35,12 +34,12 @@ import static com.epam.search.common.LoggingUtil.info;
 public class RestSyncService implements SyncService {
     private static final String API_KEY = "bjDPa4wVqDyS1xXY6ASc2S4DGSxpmTNd";
     private static final String FILES_LOCATION = "D:\\search\\";
-    private ObjectMapper mapper = new ObjectMapper();
+    public static final String INDEX_NAME = "discovery";
 
     @NotNull
     private String buildRequest(Integer number) {
         return "https://app.ticketmaster.com/discovery/v1/events.json?"
-            + "apikey=" + API_KEY + "&size=1000" + "&number=" + number;
+            + "apikey=" + API_KEY + "&size=1000" + "&page=" + number;
     }
 
     private InputStream executeRequest(String url) {
@@ -104,15 +103,15 @@ public class RestSyncService implements SyncService {
             try {
                 LinkedHashMap map = (LinkedHashMap) event;
                 String id = (String) map.get("id");
-                bulkRequest.add(client.prepareIndex("discovery", "event")
-                    .setSource(toJson(event)));
-                  //  .setId(id));
+                bulkRequest.add(client.prepareIndex(INDEX_NAME, "event")
+                    .setSource(JsonHelper.toJson(event))
+                    .setId(id));
             } catch(Exception e) {
                 error(this, "Can't deserialize " + event);
             }
         }
         BulkResponse bulkResponse = bulkRequest.get();
-        if (bulkResponse.hasFailures()) {
+        if(bulkResponse.hasFailures()) {
             error(this, "Error saving data, " + bulkResponse.buildFailureMessage());
 
         }
@@ -120,12 +119,8 @@ public class RestSyncService implements SyncService {
         info(this, "Saved " + events.length + " events to Elasticsearch");
     }
 
-    private String toJson(Object event) throws JsonProcessingException {
-        return mapper.writeValueAsString(event);
-    }
-
     private IndexResponse insertEvent(TransportClient client, String eventJson, String id) {
-        return client.prepareIndex("discovery", "event")
+        return client.prepareIndex(INDEX_NAME, "event")
             .setSource(eventJson)
             .setId(id)
             .get();
@@ -134,7 +129,7 @@ public class RestSyncService implements SyncService {
     private IndexResponse insertSingleEvent(String eventJson, String id) throws UnknownHostException {
         TransportClient client = createClient();
 
-        IndexResponse response = client.prepareIndex("discovery", "event")
+        IndexResponse response = client.prepareIndex(INDEX_NAME, "event")
             .setSource(eventJson)
             .setId(id)
             .get();
@@ -148,7 +143,7 @@ public class RestSyncService implements SyncService {
     }
 
     private EventsPage parseFile(String folder, Integer number) throws URISyntaxException, IOException {
-        return mapper.readValue(new File(buildFilePath(folder, number)), EventsPage.class);
+        return JsonHelper.getMapper().readValue(new File(buildFilePath(folder, number)), EventsPage.class);
     }
 
     private String buildFilePath(String folder, Integer pageNumber) {
