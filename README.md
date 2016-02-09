@@ -8,8 +8,10 @@ It builds war file and deploy it into embedded Tomcat.
 And than you can use browser to execute search request throught url ```http://localhost:8080/rest/search?q=query``` 
 where ```query``` - string for search.
 
-#Query examples
+#Example 1
 
-```http://localhost:8080/rest/search?q=rockz
+http://localhost:8080/rest/search?q=rockz
 
-http://localhost:8080/rest/search?q=bananaz```
+#Example 2
+
+```http://localhost:8080/rest/search?q=bananaz```
