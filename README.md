@@ -10,5 +10,6 @@ where ```query``` - string for search.
 
 #Query examples
 
-```http://localhost:8080/rest/search?q=rockz```
-```http://localhost:8080/rest/search?q=bananaz```
+```http://localhost:8080/rest/search?q=rockz
+
+http://localhost:8080/rest/search?q=bananaz```
