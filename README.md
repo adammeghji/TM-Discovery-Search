@@ -14,4 +14,4 @@ http://localhost:8080/rest/search?q=rockz
 
 #Example 2
 
-```http://localhost:8080/rest/search?q=bananaz```
+http://localhost:8080/rest/search?q=bananaz
