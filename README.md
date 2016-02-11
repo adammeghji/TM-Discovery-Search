@@ -47,3 +47,6 @@ To change params of fuzzy search use ```http://localhost:8080/rest/discovery/v1/
 8. minScore - float value to filter by score when used fuzzy search, ```default 0```
 
 For more description see [a https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html] (https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html)
+
+## Query example 
+http://localhost:8080/rest/discovery/v1/events/fuzzy?q=bananaz&fuzziness=1&prefixLength=2&maxExpansions=1000&boost=1.0
