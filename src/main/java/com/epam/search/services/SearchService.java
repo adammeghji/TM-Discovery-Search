@@ -27,8 +27,8 @@ public interface SearchService {
     default TransportClient createClient() {
         try {
             return TransportClient.builder().build()
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTIC_HOST), ELASTIC_PORT));
-        } catch(UnknownHostException e) {
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTIC_HOST), ELASTIC_PORT));
+        } catch (UnknownHostException e) {
             error(this, e);
             return null;
         }
@@ -37,7 +37,7 @@ public interface SearchService {
     default List<SearchResult> processResult(SearchHits hits) {
         List<SearchResult> result = new ArrayList<>();
         SearchHit[] searchHits = hits.getHits();
-        for(SearchHit searchHit : searchHits) {
+        for (SearchHit searchHit : searchHits) {
             SearchResult singleResult = new SearchResult();
             singleResult.setId(searchHit.getId());
             singleResult.setScore(searchHit.getScore());
@@ -50,21 +50,21 @@ public interface SearchService {
     default List<SearchResult> searchDSL(String dsl, int page, int size) {
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
-            .setQuery(QueryBuilders.simpleQueryStringQuery(dsl))
-            .setFrom(page * size).setSize(size)
-            .execute()
-            .actionGet();
+                .setQuery(QueryBuilders.simpleQueryStringQuery(dsl))
+                .setFrom(page * size).setSize(size)
+                .execute()
+                .actionGet();
         client.close();
         return processResult(response.getHits());
     }
 
-    default List<SearchResult> getAllEvents(int page1, int i, int page, int size)  {
+    default List<SearchResult> getAllEvents(int page, int size) {
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
-            .setQuery(QueryBuilders.matchAllQuery())
-            .setFrom(page * size).setSize(size)
-            .execute()
-            .actionGet();
+                .setQuery(QueryBuilders.matchAllQuery())
+                .setFrom(page * size).setSize(size)
+                .execute()
+                .actionGet();
         client.close();
         return processResult(response.getHits());
     }
@@ -72,6 +72,9 @@ public interface SearchService {
     List<SearchResult> search(String phrase, float minScore, int page, int size);
 
     List<SearchResult> search(String field, String phrase, float minScore, int page, int size);
+
+    List<SearchResult> fuzzySearch(String field, String phrase, float boost, int fuzziness, int prefixLength,
+                                   int maxExpansions, float minScore, int page, int size);
 
     List<SearchResult> search(String field, String phrase, int page, int size);
 

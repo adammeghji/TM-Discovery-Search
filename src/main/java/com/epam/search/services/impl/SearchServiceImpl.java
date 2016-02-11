@@ -30,6 +30,12 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
+    public List<SearchResult> fuzzySearch(String field, String phrase, float boost, int fuzziness, int prefixLength,
+                                          int maxExpansions, float minScore, int page, int size) {
+        throw new UnsupportedOperationException("Method fuzzySearch not supported by SearchServiceImpl");
+    }
+
+    @Override
     public List<SearchResult> search(String param, String phrase, int page, int size) {
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)

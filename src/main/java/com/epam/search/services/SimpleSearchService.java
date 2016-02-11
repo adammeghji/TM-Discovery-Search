@@ -10,5 +10,8 @@ public interface SimpleSearchService {
 
     List<SearchService.SearchResult> searchDsl(String data);
 
+    List<SearchService.SearchResult> fuzzySearch(String data, float boost, int fuzziness,
+                                                 int prefixLength, int maxExpansions, float minScore, int page, int size);
+
     List<SearchService.SearchResult> searchDsl(String data, int page, int size);
 }

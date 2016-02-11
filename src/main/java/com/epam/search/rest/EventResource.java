@@ -35,6 +35,22 @@ public class EventResource {
         return searchService.search(data, fuzzy, minScore, page, size);
     }
 
+    @RequestMapping(path = "/fuzzy", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @CrossOrigin(origins = "*")
+    public
+    @ResponseBody
+    List<SearchService.SearchResult> fuzzySearch(@RequestParam(value = "q", defaultValue = "") String data,
+                                                 @RequestParam(value = "minScore", defaultValue = "1.0") float boost,
+                                                 @RequestParam(value = "fuzziness", defaultValue = "2") int fuzziness,
+                                                 @RequestParam(value = "prefixLength", defaultValue = "0") int prefixLength,
+                                                 @RequestParam(value = "maxExpansions", defaultValue = "50") int maxExpansions,
+                                                 @RequestParam(value = "minScore", defaultValue = "0") float minScore,
+                                                 @RequestParam(value = "page", defaultValue = "0") int page,
+                                                 @RequestParam(value = "size", defaultValue = "1000") int size) {
+        return searchService.fuzzySearch(data, boost, fuzziness, prefixLength, maxExpansions, minScore, page, size);
+    }
+
     @RequestMapping(path = "/dsl", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     @CrossOrigin(origins = "*")

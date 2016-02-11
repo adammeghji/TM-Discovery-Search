@@ -3,6 +3,7 @@ package com.epam.search.services.impl;
 import com.epam.search.services.SearchService;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,24 @@ public class FuzzySearchService implements SearchService {
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
                 .setQuery(QueryBuilders.fuzzyQuery(field, phrase))
+                .setMinScore(minScore)
+                .setFrom(page * size).setSize(size)
+                .execute()
+                .actionGet();
+        client.close();
+        return processResult(response.getHits());
+    }
+
+    @Override
+    public List<SearchResult> fuzzySearch(String field, String phrase, float boost, int fuzziness, int prefixLength,
+                                          int maxExpansions, float minScore, int page, int size) {
+        TransportClient client = createClient();
+        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
+                .setQuery(QueryBuilders.fuzzyQuery(field, phrase)
+                        .boost(boost)
+                        .fuzziness(Fuzziness.fromEdits(fuzziness))
+                        .prefixLength(prefixLength)
+                        .maxExpansions(maxExpansions))
                 .setMinScore(minScore)
                 .setFrom(page * size).setSize(size)
                 .execute()

@@ -24,7 +24,7 @@ public class GatewaySearchService implements SimpleSearchService {
     @Override
     public List<SearchService.SearchResult> search(String data, boolean fuzzy, float minScore, int page, int size) {
         if (data == null || data.isEmpty())
-            return searchService.getAllEvents(0, 1000, page, size);
+            return searchService.getAllEvents(page, size);
         if (fuzzy)
             return processFuzzySearch(data, minScore, page, size);
         else
@@ -49,6 +49,21 @@ public class GatewaySearchService implements SimpleSearchService {
         String phrase = splited[1];
         return searchService.search(field, phrase, page, size);
 
+    }
+
+    @Override
+    public List<SearchService.SearchResult> fuzzySearch(String data, float boost, int fuzziness,
+                                                        int prefixLength, int maxExpansions, float minScore, int page, int size) {
+        String field, phrase;
+        if (!data.contains(":")) {
+            field = "_all";
+            phrase = data;
+        } else {
+            String[] splited = data.split(":");
+            field = splited[0];
+            phrase = splited[1];
+        }
+        return fuzzySearchService.fuzzySearch(field, phrase, boost, fuzziness, prefixLength, maxExpansions, minScore, page, size);
     }
 
     @Override
