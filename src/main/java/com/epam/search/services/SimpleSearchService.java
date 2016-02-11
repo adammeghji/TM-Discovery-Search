@@ -1,17 +1,15 @@
 package com.epam.search.services;
 
-import java.util.List;
-
 /**
  * Created by Dmytro_Kovalskyi on 10.02.2016.
  */
 public interface SimpleSearchService {
-    List<SearchService.SearchResult> search(String data, boolean fuzzy, float minScore, int page, int size);
+    SearchService.SearchResult search(String data, boolean fuzzy, float minScore, int page, int size);
 
-    List<SearchService.SearchResult> searchDsl(String data);
+    SearchService.SearchResult searchDsl(String data);
 
-    List<SearchService.SearchResult> fuzzySearch(String data, float boost, int fuzziness,
-                                                 int prefixLength, int maxExpansions, float minScore, int page, int size);
+    SearchService.SearchResult fuzzySearch(String data, float boost, int fuzziness,
+                                                       int prefixLength, int maxExpansions, float minScore, int page, int size);
 
-    List<SearchService.SearchResult> searchDsl(String data, int page, int size);
+    SearchService.SearchResult searchDsl(String data, int page, int size);
 }

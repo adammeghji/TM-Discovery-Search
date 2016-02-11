@@ -34,11 +34,11 @@ public interface SearchService {
         }
     }
 
-    default List<SearchResult> processResult(SearchHits hits) {
-        List<SearchResult> result = new ArrayList<>();
+    default List<SingleSearchResult> processResult(SearchHits hits) {
+        List<SingleSearchResult> result = new ArrayList<>();
         SearchHit[] searchHits = hits.getHits();
         for (SearchHit searchHit : searchHits) {
-            SearchResult singleResult = new SearchResult();
+            SingleSearchResult singleResult = new SingleSearchResult();
             singleResult.setId(searchHit.getId());
             singleResult.setScore(searchHit.getScore());
             singleResult.setSource(searchHit.getSource());
@@ -47,7 +47,8 @@ public interface SearchService {
         return result;
     }
 
-    default List<SearchResult> searchDSL(String dsl, int page, int size) {
+
+    default SearchService.SearchResult searchDSL(String dsl, int page, int size) {
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
                 .setQuery(QueryBuilders.simpleQueryStringQuery(dsl))
@@ -55,10 +56,10 @@ public interface SearchService {
                 .execute()
                 .actionGet();
         client.close();
-        return processResult(response.getHits());
+        return new SearchResult(processResult(response.getHits()),page, size, response.getHits().getTotalHits());
     }
 
-    default List<SearchResult> getAllEvents(int page, int size) {
+    default SearchResult getAllEvents(int page, int size) {
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
@@ -66,22 +67,22 @@ public interface SearchService {
                 .execute()
                 .actionGet();
         client.close();
-        return processResult(response.getHits());
+        return new SearchResult(processResult(response.getHits()),page, size, response.getHits().getTotalHits());
     }
 
-    List<SearchResult> search(String phrase, float minScore, int page, int size);
+    SearchService.SearchResult search(String phrase, float minScore, int page, int size);
 
-    List<SearchResult> search(String field, String phrase, float minScore, int page, int size);
+    SearchService.SearchResult search(String field, String phrase, float minScore, int page, int size);
 
-    List<SearchResult> fuzzySearch(String field, String phrase, float boost, int fuzziness, int prefixLength,
-                                   int maxExpansions, float minScore, int page, int size);
+    SearchService.SearchResult fuzzySearch(String field, String phrase, float boost, int fuzziness, int prefixLength,
+                                         int maxExpansions, float minScore, int page, int size);
 
-    List<SearchResult> search(String field, String phrase, int page, int size);
+    SearchService.SearchResult search(String field, String phrase, int page, int size);
 
-    List<SearchResult> search(String data, int page, int size);
+    SearchService.SearchResult search(String data, int page, int size);
 
 
-    class SearchResult {
+    class SingleSearchResult {
         private String id;
         private Float score;
         private Map<String, Object> source;
@@ -108,6 +109,55 @@ public interface SearchService {
 
         public void setSource(Map<String, Object> source) {
             this.source = source;
+        }
+    }
+
+    class SearchResult {
+        public SearchResult(List<SingleSearchResult> result, int page, int size, long total) {
+            this.result = result;
+            this.page = page;
+            this.size = size;
+            this.total = total;
+        }
+
+        public SearchResult() {
+        }
+
+        private List<SingleSearchResult> result;
+        private int page;
+        private int size;
+        private long total;
+
+        public List<SingleSearchResult> getResult() {
+            return result;
+        }
+
+        public void setResult(List<SingleSearchResult> result) {
+            this.result = result;
+        }
+
+        public int getPage() {
+            return page;
+        }
+
+        public void setPage(int page) {
+            this.page = page;
+        }
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(int size) {
+            this.size = size;
+        }
+
+        public long getTotal() {
+            return total;
+        }
+
+        public void setTotal(long total) {
+            this.total = total;
         }
     }
 }

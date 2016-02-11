@@ -27,11 +27,11 @@ public class EventResource {
     @CrossOrigin(origins = "*")
     public
     @ResponseBody
-    List<SearchService.SearchResult> search(@RequestParam(value = "q", defaultValue = "") String data,
-                                            @RequestParam(value = "fuzzy", defaultValue = "false") boolean fuzzy,
-                                            @RequestParam(value = "minScore", defaultValue = "0") float minScore,
-                                            @RequestParam(value = "page", defaultValue = "0") int page,
-                                            @RequestParam(value = "size", defaultValue = "1000") int size) {
+    SearchService.SearchResult search(@RequestParam(value = "q", defaultValue = "") String data,
+                                      @RequestParam(value = "fuzzy", defaultValue = "false") boolean fuzzy,
+                                      @RequestParam(value = "minScore", defaultValue = "0") float minScore,
+                                      @RequestParam(value = "page", defaultValue = "0") int page,
+                                      @RequestParam(value = "size", defaultValue = "1000") int size) {
         return searchService.search(data, fuzzy, minScore, page, size);
     }
 
@@ -40,14 +40,14 @@ public class EventResource {
     @CrossOrigin(origins = "*")
     public
     @ResponseBody
-    List<SearchService.SearchResult> fuzzySearch(@RequestParam(value = "q", defaultValue = "") String data,
-                                                 @RequestParam(value = "boost", defaultValue = "1.0") float boost,
-                                                 @RequestParam(value = "fuzziness", defaultValue = "2") int fuzziness,
-                                                 @RequestParam(value = "prefixLength", defaultValue = "0") int prefixLength,
-                                                 @RequestParam(value = "maxExpansions", defaultValue = "50") int maxExpansions,
-                                                 @RequestParam(value = "minScore", defaultValue = "0") float minScore,
-                                                 @RequestParam(value = "page", defaultValue = "0") int page,
-                                                 @RequestParam(value = "size", defaultValue = "1000") int size) {
+    SearchService.SearchResult fuzzySearch(@RequestParam(value = "q", defaultValue = "") String data,
+                                           @RequestParam(value = "boost", defaultValue = "1.0") float boost,
+                                           @RequestParam(value = "fuzziness", defaultValue = "2") int fuzziness,
+                                           @RequestParam(value = "prefixLength", defaultValue = "0") int prefixLength,
+                                           @RequestParam(value = "maxExpansions", defaultValue = "50") int maxExpansions,
+                                           @RequestParam(value = "minScore", defaultValue = "0") float minScore,
+                                           @RequestParam(value = "page", defaultValue = "0") int page,
+                                           @RequestParam(value = "size", defaultValue = "1000") int size) {
         return searchService.fuzzySearch(data, boost, fuzziness, prefixLength, maxExpansions, minScore, page, size);
     }
 
@@ -56,11 +56,11 @@ public class EventResource {
     @CrossOrigin(origins = "*")
     public
     @ResponseBody
-    List<SearchService.SearchResult> searchDsl(@RequestBody DslRequest request) {
+    SearchService.SearchResult searchDsl(@RequestBody DslRequest request) {
         return searchService.searchDsl(request.getDsl(), request.getPage(), request.getSize());
     }
 
-    private String prepareResponse(List<SearchService.SearchResult> search, boolean pretty) {
+    private String prepareResponse(List<SearchService.SingleSearchResult> search, boolean pretty) {
         try {
             return JsonHelper.toJson(search, pretty);
         } catch (JsonProcessingException e) {

@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * Created by Dmytro_Kovalskyi on 10.02.2016.
  */
@@ -22,7 +20,7 @@ public class GatewaySearchService implements SimpleSearchService {
     private SearchService searchService;
 
     @Override
-    public List<SearchService.SearchResult> search(String data, boolean fuzzy, float minScore, int page, int size) {
+    public SearchService.SearchResult search(String data, boolean fuzzy, float minScore, int page, int size) {
         if (data == null || data.isEmpty())
             return searchService.getAllEvents(page, size);
         if (fuzzy)
@@ -31,7 +29,7 @@ public class GatewaySearchService implements SimpleSearchService {
             return processSearch(data, page, size);
     }
 
-    private List<SearchService.SearchResult> processFuzzySearch(String data, float minScore, int page, int size) {
+    private SearchService.SearchResult processFuzzySearch(String data, float minScore, int page, int size) {
         if (!data.contains(":"))
             return fuzzySearchService.search(data, minScore, page, size);
         String[] splited = data.split(":");
@@ -41,7 +39,7 @@ public class GatewaySearchService implements SimpleSearchService {
         return fuzzySearchService.search(field, phrase, minScore, page, size);
     }
 
-    private List<SearchService.SearchResult> processSearch(String data, int page, int size) {
+    private SearchService.SearchResult processSearch(String data, int page, int size) {
         if (!data.contains(":"))
             return searchService.search(data, page, size);
         String[] splited = data.split(":");
@@ -52,8 +50,8 @@ public class GatewaySearchService implements SimpleSearchService {
     }
 
     @Override
-    public List<SearchService.SearchResult> fuzzySearch(String data, float boost, int fuzziness,
-                                                        int prefixLength, int maxExpansions, float minScore, int page, int size) {
+    public SearchService.SearchResult fuzzySearch(String data, float boost, int fuzziness,
+                                                              int prefixLength, int maxExpansions, float minScore, int page, int size) {
         String field, phrase;
         if (!data.contains(":")) {
             field = "_all";
@@ -67,12 +65,12 @@ public class GatewaySearchService implements SimpleSearchService {
     }
 
     @Override
-    public List<SearchService.SearchResult> searchDsl(String data, int page, int size) {
+    public SearchService.SearchResult searchDsl(String data, int page, int size) {
         return searchService.searchDSL(data, page, size);
     }
 
     @Override
-    public List<SearchService.SearchResult> searchDsl(String data) {
+    public SearchService.SearchResult searchDsl(String data) {
         return searchDsl(data, 0, 1000);
     }
 }
