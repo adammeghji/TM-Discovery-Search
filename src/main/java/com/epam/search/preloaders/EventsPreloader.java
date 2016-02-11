@@ -1,4 +1,4 @@
-package com.epam.search;
+package com.epam.search.preloaders;
 
 import com.epam.search.services.SyncService;
 import com.epam.search.services.impl.RestSyncService;

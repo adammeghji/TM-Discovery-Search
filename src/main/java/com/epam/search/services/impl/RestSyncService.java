@@ -4,6 +4,16 @@ import com.epam.search.common.JsonHelper;
 import com.epam.search.domain.EventsPage;
 import com.epam.search.services.SyncService;
 import com.sun.istack.internal.NotNull;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,15 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import static com.epam.search.common.ErrorUtil.tryable;
 import static com.epam.search.common.LoggingUtil.error;
@@ -104,7 +105,7 @@ public class RestSyncService implements SyncService {
                 LinkedHashMap map = (LinkedHashMap) event;
                 String id = (String) map.get("id");
                 bulkRequest.add(client.prepareIndex(INDEX_NAME, "event")
-                    .setSource(JsonHelper.toJson(event))
+                    .setSource(JsonHelper.toJson(event, false))
                     .setId(id));
             } catch(Exception e) {
                 error(this, "Can't deserialize " + event);

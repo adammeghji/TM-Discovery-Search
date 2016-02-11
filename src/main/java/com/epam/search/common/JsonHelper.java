@@ -19,8 +19,11 @@ public class JsonHelper {
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
-    public static String toJson(Object data) throws JsonProcessingException {
-        return mapper.writeValueAsString(data);
+    public static String toJson(Object data, boolean pretty) throws JsonProcessingException {
+        if (pretty)
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+        else
+            return mapper.writeValueAsString(data);
     }
 
     public static ObjectMapper getMapper() {
