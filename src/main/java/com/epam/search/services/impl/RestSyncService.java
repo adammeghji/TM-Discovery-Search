@@ -3,7 +3,6 @@ package com.epam.search.services.impl;
 import com.epam.search.common.JsonHelper;
 import com.epam.search.domain.EventsPage;
 import com.epam.search.services.SyncService;
-import com.sun.istack.internal.NotNull;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -37,7 +36,6 @@ public class RestSyncService implements SyncService {
     private static final String FILES_LOCATION = "D:\\search\\";
     public static final String INDEX_NAME = "discovery";
 
-    @NotNull
     private String buildRequest(Integer number) {
         return "https://app.ticketmaster.com/discovery/v1/events.json?"
             + "apikey=" + API_KEY + "&size=1000" + "&page=" + number;
