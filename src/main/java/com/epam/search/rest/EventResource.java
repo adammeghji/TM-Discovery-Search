@@ -30,9 +30,10 @@ public class EventResource {
     SearchService.SearchResult search(@RequestParam(value = "q", defaultValue = "") String data,
                                       @RequestParam(value = "fuzzy", defaultValue = "false") boolean fuzzy,
                                       @RequestParam(value = "minScore", defaultValue = "0") float minScore,
+                                      @RequestParam(value = "fullPhrase", defaultValue = "false") boolean fullPhrase,
                                       @RequestParam(value = "page", defaultValue = "0") int page,
                                       @RequestParam(value = "size", defaultValue = "1000") int size) {
-        return searchService.search(data, fuzzy, minScore, page, size);
+        return searchService.search(data, fuzzy, fullPhrase, minScore, page, size);
     }
 
     @RequestMapping(path = "/fuzzy", method = RequestMethod.GET)

@@ -70,17 +70,6 @@ public interface SearchService {
         return new SearchResult(processResult(response.getHits()),page, size, response.getHits().getTotalHits());
     }
 
-    SearchService.SearchResult search(String phrase, float minScore, int page, int size);
-
-    SearchService.SearchResult search(String field, String phrase, float minScore, int page, int size);
-
-    SearchService.SearchResult fuzzySearch(String field, String phrase, float boost, int fuzziness, int prefixLength,
-                                         int maxExpansions, float minScore, int page, int size);
-
-    SearchService.SearchResult search(String field, String phrase, int page, int size);
-
-    SearchService.SearchResult search(String data, int page, int size);
-
 
     class SingleSearchResult {
         private String id;

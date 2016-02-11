@@ -1,9 +1,10 @@
 package com.epam.search.services.impl;
 
+import com.epam.search.services.FuzzySearchService;
+import com.epam.search.services.PlainSearchService;
 import com.epam.search.services.SearchService;
 import com.epam.search.services.SimpleSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,21 +13,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class GatewaySearchService implements SimpleSearchService {
     @Autowired
-    @Qualifier("fuzzySearchService")
-    private SearchService fuzzySearchService;
+    private FuzzySearchService fuzzySearchService;
 
     @Autowired
-    @Qualifier("searchService")
-    private SearchService searchService;
+    private PlainSearchService searchService;
 
     @Override
-    public SearchService.SearchResult search(String data, boolean fuzzy, float minScore, int page, int size) {
+    public SearchService.SearchResult search(String data, boolean fuzzy, boolean fullPhrase, float minScore, int page, int size) {
         if (data == null || data.isEmpty())
             return searchService.getAllEvents(page, size);
         if (fuzzy)
             return processFuzzySearch(data, minScore, page, size);
         else
-            return processSearch(data, page, size);
+            return processSearch(data, fullPhrase, page, size);
     }
 
     private SearchService.SearchResult processFuzzySearch(String data, float minScore, int page, int size) {
@@ -39,19 +38,19 @@ public class GatewaySearchService implements SimpleSearchService {
         return fuzzySearchService.search(field, phrase, minScore, page, size);
     }
 
-    private SearchService.SearchResult processSearch(String data, int page, int size) {
+    private SearchService.SearchResult processSearch(String data, boolean fullPhrase, int page, int size) {
         if (!data.contains(":"))
-            return searchService.search(data, page, size);
+            return searchService.search(data, fullPhrase, page, size);
         String[] splited = data.split(":");
         String field = splited[0];
         String phrase = splited[1];
-        return searchService.search(field, phrase, page, size);
+        return searchService.search(field, phrase, fullPhrase, page, size);
 
     }
 
     @Override
     public SearchService.SearchResult fuzzySearch(String data, float boost, int fuzziness,
-                                                              int prefixLength, int maxExpansions, float minScore, int page, int size) {
+                                                  int prefixLength, int maxExpansions, float minScore, int page, int size) {
         String field, phrase;
         if (!data.contains(":")) {
             field = "_all";
