@@ -41,7 +41,7 @@ public class EventResource {
     public
     @ResponseBody
     List<SearchService.SearchResult> fuzzySearch(@RequestParam(value = "q", defaultValue = "") String data,
-                                                 @RequestParam(value = "minScore", defaultValue = "1.0") float boost,
+                                                 @RequestParam(value = "boost", defaultValue = "1.0") float boost,
                                                  @RequestParam(value = "fuzziness", defaultValue = "2") int fuzziness,
                                                  @RequestParam(value = "prefixLength", defaultValue = "0") int prefixLength,
                                                  @RequestParam(value = "maxExpansions", defaultValue = "50") int maxExpansions,
