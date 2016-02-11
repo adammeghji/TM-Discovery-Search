@@ -7,7 +7,7 @@ After that in root directory execute following commands ```mvn clean package tom
 It builds war file and deploy it into embedded Tomcat.
 And than you can use browser to execute search request throught url ```http://localhost:8080/rest/discovery/v1/events``` 
 
-#params
+#Params
 q - string for search can be used as ```filed:query``` for example name:music (or muzic when enabled fuzzy search)
 fuzzy - boolean value to enable fuzzy search
 page - int value to find specific page
