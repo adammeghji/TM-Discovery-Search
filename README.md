@@ -7,12 +7,12 @@ After that in root directory execute following commands ```mvn clean package tom
 It builds war file and deploy it into embedded Tomcat.
 And than you can use browser to execute search request throught url ```http://localhost:8080/rest/discovery/v1/events``` 
 
-#Params
-q - string for search can be used as ```filed:query``` for example name:music (or muzic when enabled fuzzy search)
-fuzzy - boolean value to enable fuzzy search
-page - int value to find specific page
-size - int value to set amount of elements
-minScore - float value to filter by score when used fuzzy search
+##Params
+1. q - string for search can be used as ```filed:query``` for example name:music (or muzic when enabled fuzzy search)
+2. fuzzy - boolean value to enable fuzzy search, ```default false``` 
+3. page - int value to find specific page, ```default 0 ```
+4. size - int value to set amount of elements, ```default 1000```
+5. minScore - float value to filter by score when used fuzzy search, ```default 0```
 
 
 #Example 1
@@ -33,3 +33,17 @@ to execute custom query send POST request into ```http://localhost:8080/rest/dis
     "size" : 5
 }
 
+#Extended Fuzzy search
+To change params of fuzzy search use ```http://localhost:8080/rest/discovery/v1/events/fuzzy``` url for GET method
+
+## Allowed params
+1. q - string for search can be used as ```filed:query``` for example name:music (or muzic when enabled fuzzy search)
+2. fuzziness - int value, the maximum edit distance, ```default 2```, allowed values ```0, 1, 2``` 
+3. boost - float value ```default 1.0```
+4. prefixLength - int value, the number of initial characters which will not be “fuzzified”. This helps to reduce the number of terms     which must be examined, ```default 0```
+5. maxExpansions - int value, the maximum number of terms that the fuzzy query will expand to,  ```default 50```
+6. page - int value to find specific page, ```default 0 ```
+7. size - int value to set amount of elements, ```default 1000```
+8. minScore - float value to filter by score when used fuzzy search, ```default 0```
+
+For more description see [a https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html] (https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html)
