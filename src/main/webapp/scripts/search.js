@@ -15,7 +15,9 @@
         return o;
     };
 
-    var search_keyword_TM_url = 'https://app.ticketmaster.com/discovery/v1/events.json?apikey=7elxdku9GGG5k8j0Xm8KWdANDgecHMV0', // base URL
+    var search_keyword_TM_url = 'https://app.ticketmaster.com/discovery/v1/events.json?apikey=7elxdku9GGG5k8j0Xm8KWdANDgecHMV0', // base URL for TM
+        search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events?size=20', // base URL for EPAM
+        fuzzy_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events?fuzzy=true&size=20', // base URL for EPAM with fuzzy
         spinner;
 
     $(document).ready(function(){
@@ -28,8 +30,10 @@
             var approach = getApproach();
             if (approach === "TM")
                 runTMRequest(); // run TM request
-            else
+            else if (approach === "EPAM")
                 runEPAMRequest(); // run EPAM request
+            else
+                runFuzzyRequest(); // run EPAM fuzzy request
         });
 
         // run query on enter
@@ -41,7 +45,7 @@
             }
         });
 
-        // get approach: 'TM' or 'EPAM'
+        // get approach: 'TM' or 'EPAM' or 'FUZZY'
         var getApproach = function(){
             var selected = $("input[type='radio'][name='approach']:checked");
             if (selected.length > 0)
@@ -56,15 +60,35 @@
                 url = search_keyword_TM_url + (keyword ? ('&keyword=' + keyword) : '');
 
             sendRequest(url, function(json){
-                new Column(json, '_embedded.events', url);
+                new Column(json, '_embedded.events', url, false);
             });
         };
 
-        // column constructor
-        var Column = function(json, pathToArray, url){
+        // runs EPAM request
+        var runEPAMRequest = function(){
+            var keyword = getKeywordValue(),
+                url = search_keyword_EPAM_url + (keyword ? ('&q=' + keyword) : '');
+
+            sendRequest(url, function(json){
+                new Column(json, 'result', url, true);
+            });
+        };
+
+        // runs EPAM fuzzy request
+        var runFuzzyRequest = function(){
+            var keyword = getKeywordValue(),
+                url = fuzzy_search_keyword_EPAM_url + (keyword ? ('&q=' + keyword) : '');
+
+            sendRequest(url, function(json){
+                new Column(json, 'result', url, true);
+            });
+        };
+
+        // column constructor for TM
+        var Column = function(json, pathToArray, url, isEPAM){
             var self = this;
-            self.page = parseInt(json['page']['number']); //current page number (taken from json)
-            self.totalPages = parseInt(json['page']['totalPages']); // total page number (taken from json)
+            self.page = isEPAM ? parseInt(json['page']) : parseInt(json['page']['number']); //current page number (taken from json)
+            self.totalPages = isEPAM ? Math.floor(parseInt(json['total'] / 20)) : parseInt(json['page']['totalPages']); // total page number (taken from json)
             self.url = url; // base url (with API key and keyword) without page parameter
             self.render = function(){
                 var column = $('<div class="list-group"></div>'), // column wrapper
@@ -78,18 +102,19 @@
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row"></a>'), // item wrapper
                         leftColumn = $('<div class="col-xs-4"></div>'), // wrapper left column
-                        name = $('<div>' + array[item].name + '</div>'), // item name
-                        id = $('<div>' + array[item].id + '</div>'); // item id
+                        name = $('<div>' + (isEPAM ? array[item]['source']['name'] : array[item].name) + '</div>'), // item name
+                        id = $('<div>' + (isEPAM ? array[item]['source']['id'] : array[item].id) + '</div>'), // item id
+                        itemUrl = isEPAM ? array[item]['source']['eventUrl'] : array[item].eventUrl; // item URL
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
-                    if (array[item].eventUrl) // apend link to TM if there is any to wrapper left column
-                        leftColumn.append($('<a target="_blank" href="' + array[item].eventUrl + '">Link to TM</div>'));
+                    if (itemUrl) // apend link to TM if there is any to wrapper left column
+                        leftColumn.append($('<a target="_blank" href="' + itemUrl + '">Link to TM</div>'));
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
                 }
                 self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
-                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - 1) ? ('class="disabled"') : '') +  '></a>'); // next page button
-                self.paging = $('<p id="paging">' + 'page ' + (self.page + 1) + ' of ' + self.totalPages + '</p>'); // display current page of total
+                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
+                self.paging = $('<p id="paging">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</p>'); // display current page of total
                 responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three above to column
             };
             self.setListeners = function(){
@@ -104,21 +129,16 @@
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
                 sendRequest(self.url + '&page=' + (self.page - 1), function(response){
-                    new Column(response, pathToArray, self.url);
+                    new Column(response, pathToArray, self.url, isEPAM);
                 });
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
                 sendRequest(self.url + '&page=' + (self.page + 1), function(response){
-                    new Column(response, pathToArray, self.url);
+                    new Column(response, pathToArray, self.url, isEPAM);
                 });
             };
             self.render();
             self.setListeners();
-        };
-
-        // runs EPAM request
-        var runEPAMRequest = function(){
-            //?
         };
 
         // returns keyword
