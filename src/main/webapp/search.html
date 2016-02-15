@@ -1,0 +1,80 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discovery API search</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+    <style>
+        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+        .key { color: red; display:block}
+        .row { margin: 0 }
+        .row-container { max-width: 1170px; margin: 0 auto; }
+        </style>
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+
+<div id="spinner" style="display: none;"></div>
+
+<!--bootstrap error popup-->
+<div id="error-alert" class="modal fade" role="dialog">
+    <div class="vertical-alignment-helper">
+        <div class="modal-dialog vertical-align-center">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="error-message">Whoa! Method returned an error. :(</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-default btn-small" data-dismiss="modal" style="top: 0 !important;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="row-container">
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-xs-10"><input type="text" id="text-to-search" class="form-control" placeholder="Keyword to search"></div>
+            <div class="col-xs-2"><a href="#" class="btn btn-success btn-block" id="search-btn">Search</a></div>
+        </div>
+        <form role="form" style="margin-top: 10px;" id='select-approach' class="col-xs-12">
+            <label class="radio-inline">
+                <input type="radio" name="approach" value="TM" checked = "checked">TM
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="approach" value="EPAM">EPAM
+            </label>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="row-container">
+        <div class="col-xs-12" id="response">
+
+        </div>
+    </div>
+</div>
+
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+
+<script src="http://warfares.github.io/pretty-json/libs/underscore-min.js"></script>
+<script src="http://warfares.github.io/pretty-json/libs/backbone-min.js"></script>
+<script src="http://warfares.github.io/pretty-json/pretty-json-min.js"></script>
+<script src="/scripts/search.js"></script>
+</body>
+</html>
