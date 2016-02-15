@@ -1,6 +1,171 @@
 <html>
-<head>Discovery search</head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discovery API search</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+    <style>
+        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+        .key { color: red; display:block}
+        </style>
+</head>
 <body>
-<h1>Fuzzy Search2</h1>
+
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <p>Some text in the modal.</p>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Discovery API search</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Simple search by keyword.</h2>
+
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>TM Discovery API</h3>
+
+            <p>Single world search. Try "ZZ"</p>
+            <p>Phrase search. Try "ZZ top"</p>
+            <p>No search in fields.</p>
+            <p>No score for search result.</p>
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-warning">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <input type="text" value="ZZ" class="form-control event-param" placeholder="Keyword" qname = "keyword" id="keyword1_TM">
+                </a>
+                <button id="search_keyword_TM" type="button" class="list-group-item list-group-item-warning">GET</button>
+
+            </div>
+
+            <div id="search_keyword_TM_result" class="list-group active">
+
+            </div>
+
+        </div>
+        <div class="col-md-6">
+            <h3>Search API</h3>
+
+            <p>Single world search. Try "ZZ"</p>
+            <p>Phrase search. Try "ZZ top"</p>
+            <p>Search in fields. Try "name:ZZ"</p>
+            <p>Score for search result. Try "ZZ Top"</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-success">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <input type="text" value="ZZ" class="form-control event-param" placeholder="Keyword" qname = "q" id="keyword1_EPAM">
+                </a>
+                <button id="search_keyword_EPAM" type="button" class="list-group-item list-group-item-success">GET</button>
+            </div>
+
+
+            <div id="search_keyword_EPAM_result" class="list-group active">
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Fuzzy search by keyword.</h2>
+
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>TM Discovery API</h3>
+
+            <p>No Fuzzy search</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-warning">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <input type="text" value="bananaz" class="form-control event-param" placeholder="Keyword" qname = "keyword" id="keyword2_TM">
+                </a>
+                <button id="fuzzy_search_keyword_TM" type="button" class="list-group-item list-group-item-warning">GET</button>
+
+            </div>
+
+            <div id="fuzzy_search_keyword_TM_result" class="list-group active">
+
+            </div>
+
+        </div>
+        <div class="col-md-6">
+            <h3>Search API</h3>
+
+            <p>Fuzzy search. Try "bananaz"</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-success">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <input type="text" value="bananaz" class="form-control event-param" placeholder="Keyword" qname = "q" id="keyword2_EPAM">
+                </a>
+                <button id="fuzzy_search_keyword_EPAM" type="button" class="list-group-item list-group-item-success">GET</button>
+            </div>
+
+
+            <div id="fuzzy_search_keyword_EPAM_result" class="list-group active">
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+
+<script src="http://warfares.github.io/pretty-json/libs/underscore-min.js"></script>
+<script src="http://warfares.github.io/pretty-json/libs/backbone-min.js"></script>
+<script src="http://warfares.github.io/pretty-json/pretty-json-min.js"></script>
+<script src="/scripts/script.js"></script>
 </body>
 </html>

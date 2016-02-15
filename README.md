@@ -13,6 +13,7 @@ And than you can use browser to execute search request throught url ```http://lo
 3. page - int value to find specific page, ```default 0 ```
 4. size - int value to set amount of elements, ```default 1000```
 5. minScore - float value to filter by score when used fuzzy search, ```default 0```
+6. fullPhrase - use strict search ```default false``` 
 
 
 #Example 1
