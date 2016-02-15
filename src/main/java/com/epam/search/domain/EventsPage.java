@@ -1,6 +1,7 @@
 package com.epam.search.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Arrays;
 
 /**
@@ -12,6 +13,27 @@ public class EventsPage {
     @JsonProperty("_embedded")
     private Embedded embedded;
     private PageInfo page;
+    @JsonProperty("_embedded.venue")
+    private Object venue;
+    @JsonProperty("_embedded.eventUrl")
+    private String eventUrl;
+    private Location[] location;
+
+    public Object getVenue() {
+        return venue;
+    }
+
+    public void setVenue(Object venue) {
+        this.venue = venue;
+    }
+
+    public Location[] getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location[] location) {
+        this.location = location;
+    }
 
     public Object getLinks() {
         return links;
@@ -102,6 +124,44 @@ public class EventsPage {
         public String toString() {
             final StringBuilder sb = new StringBuilder("Embedded{");
             sb.append("events=").append(Arrays.toString(events));
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
+    public static class Location {
+        public Location() {
+        }
+
+        public Location(Double lat, Double lon) {
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        private Double lat;
+        private Double lon;
+
+        public Double getLat() {
+            return lat;
+        }
+
+        public void setLat(Double lat) {
+            this.lat = lat;
+        }
+
+        public Double getLon() {
+            return lon;
+        }
+
+        public void setLon(Double lon) {
+            this.lon = lon;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Location{");
+            sb.append("lat=").append(lat);
+            sb.append(", lon=").append(lon);
             sb.append('}');
             return sb.toString();
         }

@@ -5,4 +5,6 @@ package com.epam.search.services;
  */
 public interface SyncService {
     void load();
+
+    void enableMapping();
 }

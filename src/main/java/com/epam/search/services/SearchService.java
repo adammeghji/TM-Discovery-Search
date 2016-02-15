@@ -42,6 +42,7 @@ public interface SearchService {
             singleResult.setId(searchHit.getId());
             singleResult.setScore(searchHit.getScore());
             singleResult.setSource(searchHit.getSource());
+            singleResult.setSource(searchHit.getSource());
             result.add(singleResult);
         }
         return result;
@@ -56,7 +57,7 @@ public interface SearchService {
                 .execute()
                 .actionGet();
         client.close();
-        return new SearchResult(processResult(response.getHits()),page, size, response.getHits().getTotalHits());
+        return new SearchResult(processResult(response.getHits()), page, size, response.getHits().getTotalHits());
     }
 
     default SearchResult getAllEvents(int page, int size) {
@@ -67,7 +68,7 @@ public interface SearchService {
                 .execute()
                 .actionGet();
         client.close();
-        return new SearchResult(processResult(response.getHits()),page, size, response.getHits().getTotalHits());
+        return new SearchResult(processResult(response.getHits()), page, size, response.getHits().getTotalHits());
     }
 
 
@@ -97,6 +98,9 @@ public interface SearchService {
         }
 
         public void setSource(Map<String, Object> source) {
+            if(source.containsKey("pageContent")){
+                source.remove("pageContent");
+            }
             this.source = source;
         }
     }
