@@ -113,7 +113,12 @@ public class RestSyncService implements SyncService {
                 LinkedHashMap map = (LinkedHashMap) event;
                 String id = (String) map.get("id");
                 String eventUrl = (String) map.get("eventUrl");
-                Optional<String> content = getPageContent(eventUrl);
+                Optional<String> content;
+                if (count >= 1000) {
+                    content = Optional.empty();
+                } else {
+                    content = getPageContent(eventUrl);
+                }
                 Optional<EventsPage.Location> location = getLocation(map);
                 location.map(l -> ((LinkedHashMap) event).put("location", l));
                 content.map(c -> ((LinkedHashMap) event).put("pageContent", c));
@@ -177,8 +182,8 @@ public class RestSyncService implements SyncService {
     @Override
     public void preload() {
         RestSyncService service = new RestSyncService();
-      //  service.removeIndex();
-      //  service.createIndex();
+        //  service.removeIndex();
+        //  service.createIndex();
         service.enableMapping();
         service.load();
     }

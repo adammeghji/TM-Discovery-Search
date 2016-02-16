@@ -157,6 +157,120 @@
         </div>
     </div>
 
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Search DSL</h2>
+
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>TM Discovery API</h3>
+
+            <p>No DSL search. Try use other params.</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-warning">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <textarea rows="6" class="form-control event-param" placeholder="dsl" id="keyword3_TM"></textarea>
+                </a>
+                <button id="dsl_search_keyword_TM" type="button" class="list-group-item list-group-item-warning">GET</button>
+
+            </div>
+
+            <div id="dsl_search_keyword_TM_result" class="list-group active">
+
+            </div>
+
+        </div>
+        <div class="col-md-6">
+            <h3>Search API</h3>
+
+            <p>DSL search. Try DSL.</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-success">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <textarea rows="6" class="form-control event-param" placeholder="dsl" id="keyword3_EPAM"></textarea>
+                </a>
+                <button id="dsl_search_keyword_EPAM" type="button" class="list-group-item list-group-item-success">POST</button>
+            </div>
+
+
+            <div id="dsl_search_keyword_EPAM_result" class="list-group active">
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Extended fuzzy search.</h2>
+
+
+        </div>
+        <div class="col-md-6">
+            <h3>TM Discovery API</h3>
+
+            <p>No Extended fuzzy. Try use other params.</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-warning">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <textarea rows="6" class="form-control event-param" placeholder="dsl" id="keyword4_TM"></textarea>
+                </a>
+                <button id="extended_search_keyword_TM" type="button" class="list-group-item list-group-item-warning">GET</button>
+
+            </div>
+
+            <div id="extended_search_keyword_TM_result" class="list-group active">
+
+            </div>
+
+        </div>
+        <div class="col-md-6">
+            <h3>Search API</h3>
+
+            <p>Fuzzy search. Try "bananaz"</p>
+
+
+            <div class="list-group">
+                <a class="list-group-item list-group-item-success">
+                    Parameters
+                </a>
+                <a class="list-group-item"><code>Keyword</code>
+                    <input type="text" value="bananaz" class="form-control event-param" placeholder="Keyword" qname = "q" id="keyword4_EPAM">
+                    <code>fuzziness</code>
+                    <input type="text" value="2" class="form-control event-param" placeholder="fuzziness" qname = "fuzziness" id="fuzziness4_EPAM">
+                    <code>boost</code>
+                    <input type="text" value="1.0" class="form-control event-param" placeholder="boost" qname = "boost" id="boost4_EPAM">
+                    <code>prefixLength</code>
+                    <input type="text" value="0" class="form-control event-param" placeholder="prefixLength" qname = "prefixLength" id="prefixLength4_EPAM">
+                    <code>maxExpansions</code>
+                    <input type="text" value="50" class="form-control event-param" placeholder="maxExpansions" qname = "maxExpansions" id="maxExpansions4_EPAM">
+                </a>
+                <button id="extended_search_keyword_EPAM" type="button" class="list-group-item list-group-item-success">GET</button>
+            </div>
+
+
+            <div id="extended_search_keyword_EPAM_result" class="list-group active">
+
+            </div>
+        </div>
+    </div>
+
 </div>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 
