@@ -4,7 +4,7 @@ var search_keyword_TM_url = 'https://app.ticketmaster.com/discovery/v1/events.js
 var search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events'
 var fuzzy_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events?fuzzy=true'
 var extended_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events/fuzzy'
-var dsl_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events/dsl'
+var dsl_search_keyword_EPAM_url = 'http://localhost:9200/discovery/event/_search'
 
 $( "#search_keyword_TM" ).click(function() {
   var url = search_keyword_TM_url + '&' + prepareGetParams(["#keyword1_TM"]);
@@ -215,7 +215,7 @@ $( "#dsl_search_keyword_EPAM" ).click(function() {
 
   var data = $("#keyword3_EPAM").val();
   console.log(data);
-  data = '{ "dsl":"GET _search ' + escape(data) + '"}';
+  //data = escape(data);
   //data = JSON.parse(data);
   console.log(data);
 
@@ -230,10 +230,10 @@ $( "#dsl_search_keyword_EPAM" ).click(function() {
               $('#dsl_search_keyword_TM_result').append("no result");
               return;
           }
-          var events = response.result;
+          var events = response.hits.hits;
           for (var i = 0; i < events.length; i++) {
 
-            var item = $(searchToListItem(events[i]));
+            var item = $(elasticsearchToListItem(events[i]));
 
             $('#dsl_search_keyword_EPAM_result').append(item);
 
@@ -323,6 +323,15 @@ var searchToListItem = function(search) {
     var event = search.source;
     var item = '<li class="list-group-item">'
     item = item + event.id + ' <span style="color:red"><b>' + search.score + '</b></span><br/>';
+    item = item + event.name + '<br/>';
+    item = item + '</li>'
+    return item;
+};
+
+var elasticsearchToListItem = function(search) {
+    var event = search._source;
+    var item = '<li class="list-group-item">'
+    item = item + event.id + ' <span style="color:red"><b>' + search._score + '</b></span><br/>';
     item = item + event.name + '<br/>';
     item = item + '</li>'
     return item;
