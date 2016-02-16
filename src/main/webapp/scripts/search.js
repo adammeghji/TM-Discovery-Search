@@ -16,8 +16,7 @@
     };
 
     var search_keyword_TM_url = 'https://app.ticketmaster.com/discovery/v1/events.json?apikey=7elxdku9GGG5k8j0Xm8KWdANDgecHMV0', // base URL for TM
-        search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events?size=20', // base URL for EPAM
-        fuzzy_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events?fuzzy=true&size=20', // base URL for EPAM with fuzzy
+        search_keyword_EPAM_url = 'http://localhost:9200/discovery/event/_search', // base URL for EPAM
         spinner;
 
     $(document).ready(function(){
@@ -30,10 +29,8 @@
             var approach = getApproach();
             if (approach === "TM")
                 runTMRequest(); // run TM request
-            else if (approach === "EPAM")
-                runEPAMRequest(); // run EPAM request
             else
-                runFuzzyRequest(); // run EPAM fuzzy request
+                runEPAMRequest(); // run EPAM request
         });
 
         // run query on enter
@@ -59,35 +56,58 @@
             var keyword = getKeywordValue(),
                 url = search_keyword_TM_url + (keyword ? ('&keyword=' + keyword) : '');
 
-            sendRequest(url, function(json){
+            sendRequest(url, 'GET', null, function(json){
                 new Column(json, '_embedded.events', url, false);
             });
         };
 
         // runs EPAM request
-        var runEPAMRequest = function(){
+        var runEPAMRequest = function(from){
             var keyword = getKeywordValue(),
-                url = search_keyword_EPAM_url + (keyword ? ('&q=' + keyword) : '');
+                url = search_keyword_EPAM_url,
+                splitted = keyword.split(":"),
+                EPAM_data_match = {},
+                EPAM_data = {};
 
-            sendRequest(url, function(json){
-                new Column(json, 'result', url, true);
-            });
-        };
+            if (splitted.length === 1){
+                EPAM_data_match = {
+                    "_all": {
+                        "query": splitted[0],
+                        "operator": "or",
+                        "fuzziness": 2
+                    }
+                }
+            }
+            else if (splitted.length > 1){
+                EPAM_data_match[splitted[0]] = {
+                    "query": splitted[1],
+                    "operator": "or",
+                    "fuzziness": 2
+                };
+            }
+            EPAM_data = {
+                "from" : from ? from : 0,
+                "size" : 20,
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": EPAM_data_match
+                            }
+                        ]
+                    }
+                }
+            };
 
-        // runs EPAM fuzzy request
-        var runFuzzyRequest = function(){
-            var keyword = getKeywordValue(),
-                url = fuzzy_search_keyword_EPAM_url + (keyword ? ('&q=' + keyword) : '');
-
-            sendRequest(url, function(json){
-                new Column(json, 'result', url, true);
+            sendRequest(url, 'POST', EPAM_data, function(json){
+                new Column(json, 'hits.hits', url, true, from ? from : 0);
             });
         };
 
         // column constructor for TM
-        var Column = function(json, pathToArray, url, isEPAM){
+        var Column = function(json, pathToArray, url, isEPAM, from){
             var self = this;
-            self.page = isEPAM ? parseInt(json['page']) : parseInt(json['page']['number']); //current page number (taken from json)
+            self.page = isEPAM ? (from+1)/20 : parseInt(json['page']['number']); //current page number (taken from json)
             self.totalPages = isEPAM ? Math.floor(parseInt(json['total'] / 20)) : parseInt(json['page']['totalPages']); // total page number (taken from json)
             self.url = url; // base url (with API key and keyword) without page parameter
             self.render = function(){
@@ -102,9 +122,9 @@
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row"></a>'), // item wrapper
                         leftColumn = $('<div class="col-xs-4"></div>'), // wrapper left column
-                        name = $('<div>' + (isEPAM ? array[item]['source']['name'] : array[item].name) + '</div>'), // item name
-                        id = $('<div>' + (isEPAM ? array[item]['source']['id'] : array[item].id) + '</div>'), // item id
-                        itemUrl = isEPAM ? array[item]['source']['eventUrl'] : array[item].eventUrl; // item URL
+                        name = $('<div>' + (isEPAM ? array[item]['_source']['name'] : array[item].name) + '</div>'), // item name
+                        id = $('<div>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
+                        itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl; // item URL
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
@@ -128,11 +148,20 @@
                 });
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
-                sendRequest(self.url + '&page=' + (self.page - 1), function(response){
-                    new Column(response, pathToArray, self.url, isEPAM);
-                });
+                if (isEPAM){
+                    runEPAMRequest(from - 20)
+                }
+                else {
+                    sendRequest(self.url + '&page=' + (self.page - 1), function(response){
+                        new Column(response, pathToArray, self.url, isEPAM);
+                    });
+                }
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
+                debugger
+                if (isEPAM){
+                    runEPAMRequest(from + 20);
+                }
                 sendRequest(self.url + '&page=' + (self.page + 1), function(response){
                     new Column(response, pathToArray, self.url, isEPAM);
                 });
@@ -147,12 +176,13 @@
         };
 
         //universal ajax request sender
-        var sendRequest = function(url, callback){
+        var sendRequest = function(url, method, data, callback){
             spinner.show();
             $.ajax({
-                type: "GET",
+                type: method,
                 url: url,
                 async: true,
+                data: data ? JSON.stringify(data) : "",
                 success: function(response, textStatus, jqXHR) {
                     spinner.hide();
                     callback(response);
