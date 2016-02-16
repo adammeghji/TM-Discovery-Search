@@ -7,4 +7,6 @@ public interface SyncService {
     void load();
 
     void enableMapping();
+
+    void preload();
 }

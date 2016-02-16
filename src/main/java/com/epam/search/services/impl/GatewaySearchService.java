@@ -4,6 +4,7 @@ import com.epam.search.services.FuzzySearchService;
 import com.epam.search.services.PlainSearchService;
 import com.epam.search.services.SearchService;
 import com.epam.search.services.SimpleSearchService;
+import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,13 @@ public class GatewaySearchService implements SimpleSearchService {
 
     }
 
+    private Pair<String, String> parse(String searchData) {
+        String[] splited = searchData.split(":");
+        String field = splited[0];
+        String phrase = splited[1];
+        return new Pair<>(field, phrase);
+    }
+
     @Override
     public SearchService.SearchResult fuzzySearch(String data, float boost, int fuzziness,
                                                   int prefixLength, int maxExpansions, float minScore, int page, int size) {
@@ -63,13 +71,53 @@ public class GatewaySearchService implements SimpleSearchService {
         return fuzzySearchService.fuzzySearch(field, phrase, boost, fuzziness, prefixLength, maxExpansions, minScore, page, size);
     }
 
+    private SearchService.SearchResult splittable(String data, Executable executable) {
+        String field, phrase;
+        if (!data.contains(":")) {
+            field = "_all";
+            phrase = data;
+        } else {
+            String[] splited = data.split(":");
+            field = splited[0];
+            phrase = splited[1];
+        }
+        return executable.execute(field, phrase);
+    }
+
     @Override
     public SearchService.SearchResult searchDsl(String data, int page, int size) {
         return searchService.searchDSL(data, page, size);
     }
 
     @Override
+    public SearchService.SearchResult searchNear(double latitude, double longitude, int distance) {
+        return searchService.searchNear(latitude, longitude, distance);
+    }
+
+    @Override
+    public SearchService.SearchResult dateSearch(String data, String from, String to) {
+        return splittable(data, (field, phrase) -> searchService.dateSearch(field, phrase, from, to));
+    }
+
+    @Override
+    public SearchService.SearchResult complexSearch(String data, String from, String to,
+                                                    double latitude, double longitude, int distance) {
+        return splittable(data, (field, phrase) ->
+                searchService.complexSearch(field, phrase, from, to, latitude, longitude, distance));
+    }
+
+    @Override
     public SearchService.SearchResult searchDsl(String data) {
         return searchDsl(data, 0, 1000);
+    }
+
+    @FunctionalInterface
+    private interface Executable {
+        SearchService.SearchResult execute(String field, String phrase);
+    }
+
+    public static void main(String[] args) {
+//        GatewaySearchService service = new GatewaySearchService();
+//        System.out.println(service.dateSearch("EUFF", "2015-10-06", "2016-12-09"));
     }
 }

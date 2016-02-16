@@ -98,7 +98,7 @@ public interface SearchService {
         }
 
         public void setSource(Map<String, Object> source) {
-            if(source.containsKey("pageContent")){
+            if (source.containsKey("pageContent")) {
                 source.remove("pageContent");
             }
             this.source = source;
@@ -120,6 +120,10 @@ public interface SearchService {
         private int page;
         private int size;
         private long total;
+
+        public SearchResult(List<SingleSearchResult> result) {
+            this.result = result;
+        }
 
         public List<SingleSearchResult> getResult() {
             return result;
@@ -151,6 +155,17 @@ public interface SearchService {
 
         public void setTotal(long total) {
             this.total = total;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("SearchResult{");
+            sb.append("result=").append(result);
+            sb.append(", page=").append(page);
+            sb.append(", size=").append(size);
+            sb.append(", total=").append(result.size());
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

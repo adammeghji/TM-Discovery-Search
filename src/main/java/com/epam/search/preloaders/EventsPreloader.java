@@ -10,6 +10,6 @@ import java.io.IOException;
 public class EventsPreloader {
     public static void main(String[] args) throws IOException {
         SyncService service = new RestSyncService();
-        service.load();
+        service.preload();
     }
 }

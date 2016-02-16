@@ -61,6 +61,42 @@ public class EventResource {
         return searchService.searchDsl(request.getDsl(), request.getPage(), request.getSize());
     }
 
+    @RequestMapping(path = "/dates", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @CrossOrigin(origins = "*")
+    public
+    @ResponseBody
+    SearchService.SearchResult datesSearch(@RequestParam(value = "q", defaultValue = "") String data,
+                                           @RequestParam(value = "from", defaultValue = "2015-01-01") String from,
+                                           @RequestParam(value = "to", defaultValue = "2016-12-12") String to) {
+        return searchService.dateSearch(data, from, to);
+    }
+
+    @RequestMapping(path = "/location", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @CrossOrigin(origins = "*")
+    public
+    @ResponseBody
+    SearchService.SearchResult locationSearch(@RequestParam(value = "lat", defaultValue = "43") Double latitude,
+                                              @RequestParam(value = "lon", defaultValue = "43") Double longitude,
+                                              @RequestParam(value = "dist", defaultValue = "1000") Integer distance) {
+        return searchService.searchNear(latitude, longitude, distance);
+    }
+
+    @RequestMapping(path = "/complex", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @CrossOrigin(origins = "*")
+    public
+    @ResponseBody
+    SearchService.SearchResult complexSearch(@RequestParam(value = "q", defaultValue = "") String data,
+                                             @RequestParam(value = "from", defaultValue = "2015-01-01") String from,
+                                             @RequestParam(value = "to", defaultValue = "2016-12-12") String to,
+                                             @RequestParam(value = "lat", defaultValue = "43") Double latitude,
+                                             @RequestParam(value = "lon", defaultValue = "43") Double longitude,
+                                             @RequestParam(value = "dist", defaultValue = "1000") Integer distance) {
+        return searchService.complexSearch(data, from, to, latitude, longitude, distance);
+    }
+
     private String prepareResponse(List<SearchService.SingleSearchResult> search, boolean pretty) {
         try {
             return JsonHelper.toJson(search, pretty);
