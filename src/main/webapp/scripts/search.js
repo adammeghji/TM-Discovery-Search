@@ -158,7 +158,6 @@
                 }
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
-                debugger
                 if (isEPAM){
                     runEPAMRequest(from + 20);
                 }
