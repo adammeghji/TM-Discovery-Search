@@ -51,3 +51,13 @@ For more description see [a https://www.elastic.co/guide/en/elasticsearch/refere
 
 ## Query example 
 http://localhost:8080/rest/discovery/v1/events/fuzzy?q=bananaz&fuzziness=1&prefixLength=2&maxExpansions=1000&boost=1.0
+
+#Location search example
+http://localhost:8080/rest/discovery/v1/events/location?lat=41&lon=-87&dist=100
+
+#Date search
+http://localhost:8080/rest/discovery/v1/events/dates?q=EUFF&from=2015-10-06&to=2016-12-09
+
+#Complex search
+http://localhost:8080/rest/discovery/v1/events/complex?q=a&from=2015-10-06&to=2016-12-09&lat=33&lon=-78&dist=200
+
