@@ -29,9 +29,7 @@ to execute custom query send POST request into ```http://localhost:8080/rest/dis
 
 #Example3
 {
-    "dsl":"GET _search {  \"query\": {    \"fuzzy\": {      \"_embedded.categories.name\": \"music\"    }  }}",
-    "page" : 0,
-    "size" : 5
+    "dsl":"{  \"query\": {    \"fuzzy\": {      \"_embedded.categories.name\": \"music\"    }  }}"
 }
 
 #Extended Fuzzy search
