@@ -1,5 +1,6 @@
 package com.epam.search.services.impl;
 
+import com.epam.search.common.JsonHelper;
 import com.epam.search.services.FuzzySearchService;
 import com.epam.search.services.PlainSearchService;
 import com.epam.search.services.SearchService;
@@ -7,6 +8,9 @@ import com.epam.search.services.SimpleSearchService;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.LinkedHashMap;
 
 /**
  * Created by Dmytro_Kovalskyi on 10.02.2016.
@@ -85,11 +89,6 @@ public class GatewaySearchService implements SimpleSearchService {
     }
 
     @Override
-    public SearchService.SearchResult searchDsl(String data, int page, int size) {
-        return searchService.searchDSL(data, page, size);
-    }
-
-    @Override
     public SearchService.SearchResult searchNear(double latitude, double longitude, int distance) {
         return searchService.searchNear(latitude, longitude, distance);
     }
@@ -107,8 +106,14 @@ public class GatewaySearchService implements SimpleSearchService {
     }
 
     @Override
-    public SearchService.SearchResult searchDsl(String data) {
-        return searchDsl(data, 0, 1000);
+    public Object searchDsl(String data) {
+        try {
+            LinkedHashMap hashMap = (LinkedHashMap) JsonHelper.getMapper().readValue(searchService.searchDSL(data), Object.class);
+            hashMap.remove("pageContent");
+            return hashMap;
+        } catch (IOException e) {
+            return new Object();
+        }
     }
 
     @FunctionalInterface

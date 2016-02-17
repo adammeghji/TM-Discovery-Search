@@ -22,6 +22,9 @@ import static com.epam.search.common.LoggingUtil.error;
 public interface SearchService {
 
     String ELASTIC_HOST = "localhost";
+    String INDEX_NAME = "discovery";
+    String EVENT_TYPE = "event";
+
     int ELASTIC_PORT = 9300;
 
     default TransportClient createClient() {
@@ -49,16 +52,16 @@ public interface SearchService {
     }
 
 
-    default SearchService.SearchResult searchDSL(String dsl, int page, int size) {
-        TransportClient client = createClient();
-        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
-                .setQuery(QueryBuilders.simpleQueryStringQuery(dsl))
-                .setFrom(page * size).setSize(size)
-                .execute()
-                .actionGet();
-        client.close();
-        return new SearchResult(processResult(response.getHits()), page, size, response.getHits().getTotalHits());
-    }
+//    default SearchService.SearchResult searchDSL(String dsl, int page, int size) {
+//        TransportClient client = createClient();
+//        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
+//                .setQuery(QueryBuilders.simpleQueryStringQuery(dsl))
+//                .setFrom(page * size).setSize(size)
+//                .execute()
+//                .actionGet();
+//        client.close();
+//        return new SearchResult(processResult(response.getHits()), page, size, response.getHits().getTotalHits());
+//    }
 
     default SearchResult getAllEvents(int page, int size) {
         TransportClient client = createClient();

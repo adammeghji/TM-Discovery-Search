@@ -3,10 +3,6 @@ package com.epam.search.services.impl;
 import com.epam.search.common.JsonHelper;
 import com.epam.search.domain.EventsPage;
 import com.epam.search.services.SyncService;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -34,6 +30,7 @@ import java.util.stream.Collectors;
 import static com.epam.search.common.ErrorUtil.tryable;
 import static com.epam.search.common.LoggingUtil.error;
 import static com.epam.search.common.LoggingUtil.info;
+import static com.epam.search.common.RequestHelper.executeRequest;
 
 /**
  * Created by Dmytro_Kovalskyi on 09.02.2016.
@@ -50,17 +47,6 @@ public class RestSyncService implements SyncService {
                 + "apikey=" + API_KEY + "&size=1000" + "&page=" + number;
     }
 
-    private InputStream executeRequest(String url) {
-        try {
-            HttpClient client = new DefaultHttpClient();
-            HttpGet request = new HttpGet(url);
-            HttpResponse response = client.execute(request);
-            return response.getEntity().getContent();
-        } catch (Exception e) {
-            error(null, e);
-        }
-        return null;
-    }
 
     private void saveToFile(String fileName, InputStream stream) throws IOException {
         Path targetPath = new File(fileName).toPath();
