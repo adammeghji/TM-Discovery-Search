@@ -16,4 +16,6 @@ public interface PlainSearchService extends SearchService {
     // System.out.println(service.complexSearch("", "2015-10-06", "2016-12-09", 44d, 44d, 40));
     SearchResult complexSearch(String field, String phrase, String from, String to,
                                double latitude, double longitude, int distance);
+
+    String searchDSL(String dsl);
 }

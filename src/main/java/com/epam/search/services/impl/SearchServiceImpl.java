@@ -1,5 +1,7 @@
 package com.epam.search.services.impl;
 
+import com.epam.search.common.Config;
+import com.epam.search.common.RequestHelper;
 import com.epam.search.services.PlainSearchService;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -9,6 +11,9 @@ import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+
+import static com.epam.search.common.LoggingUtil.error;
 import static org.elasticsearch.index.query.QueryBuilders.geoDistanceQuery;
 
 /**
@@ -18,6 +23,7 @@ import static org.elasticsearch.index.query.QueryBuilders.geoDistanceQuery;
 public class SearchServiceImpl implements PlainSearchService {
 
     public static final String DATES_FIELD = "dates.start.localDate";
+    public static final String BASE_REST_URL = Config.ELASTIC_HOST + "/" + Config.ELASTIC_TRANSPORT_PORT;
 
     @Override
     public SearchResult search(String phrase, boolean fullPhrase, int page, int size) {
@@ -89,12 +95,31 @@ public class SearchServiceImpl implements PlainSearchService {
         return new SearchResult(processResult(response.getHits()));
     }
 
+    @Override
+    public String searchDSL(String dsl) {
+        String result = "";
+        try {
+            String request = BASE_REST_URL + Config.INDEX_NAME + "/" + Config.EVENT_TYPE + "/_search?pretty=true&d=";
+            String encoded = URLEncoder.encode("{" + dsl + "}", "UTF-8");
+            result = RequestHelper.readResult(RequestHelper.executeRequest(request + encoded));
+        } catch (Exception e) {
+            error(this, e);
+        }
+        return result;
+    }
+
 
     public static void main(String[] args) {
         SearchServiceImpl service = new SearchServiceImpl();
         // System.out.println(service.searchNear(49d, 49d, 100));
-         System.out.println(service.dateSearch("name","EUFF", "2015-10-06", "2016-12-09"));
-       // System.out.println(service.complexSearch("_all", "", "2015-10-06", "2016-12-09", 44d, 44d, 40));
+        //System.out.println(service.dateSearch("name", "EUFF", "2015-10-06", "2016-12-09"));
+        String result = service.searchDSL("\"query\": {" +
+                "     \"match_all\" : { \"boost\" : 1.2 }" +
+                "    }");
+        System.out.println(result);
+//        String res = RequestHelper.readResult(RequestHelper.executeRequest("https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=Godfather"));
+//        System.out.println(res);
+        // System.out.println(service.complexSearch("_all", "", "2015-10-06", "2016-12-09", 44d, 44d, 40));
     }
 
 }

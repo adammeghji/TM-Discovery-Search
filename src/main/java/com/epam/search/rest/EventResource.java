@@ -57,8 +57,8 @@ public class EventResource {
     @CrossOrigin(origins = "*")
     public
     @ResponseBody
-    SearchService.SearchResult searchDsl(@RequestBody DslRequest request) {
-        return searchService.searchDsl(request.getDsl(), request.getPage(), request.getSize());
+    Object searchDsl(@RequestBody DslRequest request) {
+        return searchService.searchDsl(request.getDsl());
     }
 
     @RequestMapping(path = "/dates", method = RequestMethod.GET)
