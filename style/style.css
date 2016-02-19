@@ -1,0 +1,59 @@
+#spinner {
+    width: 100px;
+    height: 100px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -50px;
+    background: url('../assets/loader.gif');
+    background-size: 100px 100px;
+    z-index: 1000;
+}
+
+#response {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+#prev-page,
+#next-page{
+    position: absolute;
+    display: block;
+    background: red;
+    width: 50px;
+    height: 42px;
+    top: 0;
+    background: url('../assets/arrows.svg') no-repeat;
+    border-radius: 3px;
+    background-color: #ccc;
+    background-position: 10px 8px;
+    opacity: 0.7;
+}
+
+#prev-page:hover,
+#next-page:hover{
+    opacity: 1;
+}
+
+#prev-page{
+    left: -40px;
+}
+
+#next-page{
+    right: -40px;
+    -ms-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.disabled {
+    display: none !important;
+}
+
+#paging {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    margin-left: -50px;
+}
