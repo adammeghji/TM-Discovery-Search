@@ -1,5 +1,6 @@
 package com.epam.search.services.impl;
 
+import com.epam.search.common.Config;
 import com.epam.search.common.JsonHelper;
 import com.epam.search.domain.EventsPage;
 import com.epam.search.services.SyncService;
@@ -9,14 +10,13 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
-import java.io.*;
-import java.net.InetAddress;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -25,7 +25,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.epam.search.common.ErrorUtil.tryable;
 import static com.epam.search.common.LoggingUtil.error;
@@ -35,18 +34,17 @@ import static com.epam.search.common.RequestHelper.executeRequest;
 /**
  * Created by Dmytro_Kovalskyi on 09.02.2016.
  */
-public class RestSyncService implements SyncService {
+public class RestSyncService extends ElasticService implements SyncService {
     private static final String API_KEY = "bjDPa4wVqDyS1xXY6ASc2S4DGSxpmTNd";
     private static final String FILES_LOCATION = "D:\\search\\";
-    public static final String INDEX_NAME = "discovery";
-    public static final String EVENT_TYPE = "event";
+    public static final String INDEX_NAME = Config.INDEX_NAME;
+    public static final String EVENT_TYPE = Config.EVENT_TYPE;
     private int count = 0;
 
     private String buildRequest(Integer number) {
         return "https://app.ticketmaster.com/discovery/v1/events.json?"
                 + "apikey=" + API_KEY + "&size=1000" + "&page=" + number;
     }
-
 
     private void saveToFile(String fileName, InputStream stream) throws IOException {
         Path targetPath = new File(fileName).toPath();
@@ -90,6 +88,7 @@ public class RestSyncService implements SyncService {
         });
     }
 
+
     private void insertEvents(Object[] events) throws UnknownHostException {
         info(this, "Trying save " + events.length + " events to Elasticsearch");
         TransportClient client = createClient();
@@ -98,16 +97,9 @@ public class RestSyncService implements SyncService {
             try {
                 LinkedHashMap map = (LinkedHashMap) event;
                 String id = (String) map.get("id");
-                String eventUrl = (String) map.get("eventUrl");
-                Optional<String> content;
-                if (count >= 1000) {
-                    content = Optional.empty();
-                } else {
-                    content = getPageContent(eventUrl);
-                }
                 Optional<EventsPage.Location> location = getLocation(map);
                 location.map(l -> ((LinkedHashMap) event).put("location", l));
-                content.map(c -> ((LinkedHashMap) event).put("pageContent", c));
+
                 bulkRequest.add(client.prepareIndex(INDEX_NAME, "event")
                         .setSource(JsonHelper.toJson(event, false))
                         .setId(id));
@@ -144,7 +136,6 @@ public class RestSyncService implements SyncService {
             if (!location.isEmpty()) {
                 EventsPage.Location point = new EventsPage.Location(Double.valueOf((String) location.get("latitude")),
                         Double.valueOf((String) location.get("longitude")));
-                System.out.println("LOCATION : " + point);
                 return Optional.of(point);
             }
         } catch (Exception e) {
@@ -168,8 +159,8 @@ public class RestSyncService implements SyncService {
     @Override
     public void preload() {
         RestSyncService service = new RestSyncService();
-        //  service.removeIndex();
-        //  service.createIndex();
+        service.removeIndex();
+        service.createIndex();
         service.enableMapping();
         service.load();
     }
@@ -184,45 +175,6 @@ public class RestSyncService implements SyncService {
                 error(this, " Can't remove Index : " + INDEX_NAME);
             }
         });
-
-    }
-
-    private Optional<String> getPageContent(String eventUrl) {
-        try {
-            info(this, "Loading content from : " + eventUrl);
-            InputStream inputStream = executeRequest(eventUrl);
-            if (inputStream == null)
-                return Optional.empty();
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-                return Optional.of(br.lines().collect(Collectors.joining(System.lineSeparator())));
-            }
-        } catch (Exception e) {
-            error(this, "Content unavailable for : " + eventUrl);
-            return Optional.empty();
-        }
-    }
-
-    private IndexResponse insertEvent(TransportClient client, String eventJson, String id) {
-        return client.prepareIndex(INDEX_NAME, EVENT_TYPE)
-                .setSource(eventJson)
-                .setId(id)
-                .get();
-    }
-
-    private IndexResponse insertSingleEvent(String eventJson, String id) throws UnknownHostException {
-        TransportClient client = createClient();
-
-        IndexResponse response = client.prepareIndex(INDEX_NAME, EVENT_TYPE)
-                .setSource(eventJson)
-                .setId(id)
-                .get();
-        client.close();
-        return response;
-    }
-
-    private TransportClient createClient() throws UnknownHostException {
-        return TransportClient.builder().build()
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
     }
 
     private EventsPage parseFile(String folder, Integer number) throws URISyntaxException, IOException {

@@ -1,5 +1,6 @@
 package com.epam.search.services;
 
+import com.epam.search.common.Config;
 import com.epam.search.services.impl.RestSyncService;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -21,16 +22,10 @@ import static com.epam.search.common.LoggingUtil.error;
  */
 public interface SearchService {
 
-    String ELASTIC_HOST = "localhost";
-    String INDEX_NAME = "discovery";
-    String EVENT_TYPE = "event";
-
-    int ELASTIC_PORT = 9300;
-
     default TransportClient createClient() {
         try {
             return TransportClient.builder().build()
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTIC_HOST), ELASTIC_PORT));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(Config.ELASTIC_HOST), Config.ELASTIC_TRANSPORT_PORT));
         } catch (UnknownHostException e) {
             error(this, e);
             return null;
@@ -51,17 +46,6 @@ public interface SearchService {
         return result;
     }
 
-
-//    default SearchService.SearchResult searchDSL(String dsl, int page, int size) {
-//        TransportClient client = createClient();
-//        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
-//                .setQuery(QueryBuilders.simpleQueryStringQuery(dsl))
-//                .setFrom(page * size).setSize(size)
-//                .execute()
-//                .actionGet();
-//        client.close();
-//        return new SearchResult(processResult(response.getHits()), page, size, response.getHits().getTotalHits());
-//    }
 
     default SearchResult getAllEvents(int page, int size) {
         TransportClient client = createClient();

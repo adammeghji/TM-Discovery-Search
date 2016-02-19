@@ -1,5 +1,6 @@
 package com.epam.search.services.impl;
 
+import com.epam.search.common.Config;
 import com.epam.search.common.RequestHelper;
 import com.epam.search.services.PlainSearchService;
 import org.elasticsearch.action.search.SearchResponse;
@@ -22,7 +23,7 @@ import static org.elasticsearch.index.query.QueryBuilders.geoDistanceQuery;
 public class SearchServiceImpl implements PlainSearchService {
 
     public static final String DATES_FIELD = "dates.start.localDate";
-    public static final String BASE_REST_URL = "http://localhost:9200/";
+    public static final String BASE_REST_URL = Config.ELASTIC_HOST + "/" + Config.ELASTIC_TRANSPORT_PORT;
 
     @Override
     public SearchResult search(String phrase, boolean fullPhrase, int page, int size) {
@@ -98,8 +99,8 @@ public class SearchServiceImpl implements PlainSearchService {
     public String searchDSL(String dsl) {
         String result = "";
         try {
-            String request = BASE_REST_URL + INDEX_NAME + "/" + EVENT_TYPE + "/_search?pretty=true&d=";
-            String encoded =  URLEncoder.encode("{" + dsl + "}", "UTF-8") ;
+            String request = BASE_REST_URL + Config.INDEX_NAME + "/" + Config.EVENT_TYPE + "/_search?pretty=true&d=";
+            String encoded = URLEncoder.encode("{" + dsl + "}", "UTF-8");
             result = RequestHelper.readResult(RequestHelper.executeRequest(request + encoded));
         } catch (Exception e) {
             error(this, e);
