@@ -18,7 +18,7 @@
 
 #prev-page,
 #next-page{
-    position: absolute;
+    position: relative;
     display: block;
     background: red;
     width: 50px;
@@ -37,11 +37,13 @@
 }
 
 #prev-page{
-    left: -40px;
+    /*left: -40px;*/
+    float: left;
 }
 
 #next-page{
-    right: -40px;
+    /*right: -40px;*/
+    float: right;
     -ms-transform: rotate(180deg);
     -webkit-transform: rotate(180deg);
     transform: rotate(180deg);
@@ -52,8 +54,9 @@
 }
 
 #paging {
-    position: absolute;
+    /*position: absolute;
     bottom: -20px;
     left: 50%;
-    margin-left: -50px;
+    margin-left: -50px;*/
+    text-align: center;
 }

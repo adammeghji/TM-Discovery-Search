@@ -164,7 +164,14 @@
                 if (isEPAM){
                     runEPAMRequest(from + 20);
                 }
+                /*
+                console.log('self.goToNextPage pressed','isEPAM:',isEPAM);
+                console.log('self.url', self.url);
+                console.log('self.page + 1', self.page + 1);
+                */
+                //TODO sendRequest() error
                 sendRequest(self.url + '&page=' + (self.page + 1), function(response){
+                    console.log('***build new column');
                     new Column(response, pathToArray, self.url, isEPAM);
                 });
             };
