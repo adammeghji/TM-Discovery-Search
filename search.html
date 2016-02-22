@@ -48,12 +48,14 @@
             <div class="col-xs-2"><a href="#" class="btn btn-success btn-block" id="search-btn">Search</a></div>
         </div>
         <form role="form" style="margin-top: 10px;" id='select-approach' class="col-xs-12">
-            <label class="radio-inline">
-                <input type="radio" name="approach" value="TM" checked = "checked">TM
-            </label>
-            <label class="radio-inline">
-                <input type="radio" name="approach" value="EPAM">EPAM
-            </label>
+            <div class="btn-group" data-toggle="buttons">
+                <label class="radio-inline btn btn-default">
+                    <input type="radio" name="approach" value="TM" checked = "checked">TM
+                </label>
+                <label class="radio-inline btn btn-default">
+                    <input type="radio" name="approach" value="EPAM">EPAM
+                </label>
+            </div>
             <!--<label class="radio-inline">
                 <input type="radio" name="approach" value="FUZZY">EPAM fuzzy
             </label>-->
