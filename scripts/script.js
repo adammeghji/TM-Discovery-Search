@@ -4,7 +4,7 @@ var search_keyword_TM_url = 'https://app.ticketmaster.com/discovery/v1/events.js
 var search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events'
 var fuzzy_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events?fuzzy=true'
 var extended_search_keyword_EPAM_url = 'http://localhost:8080/rest/discovery/v1/events/fuzzy'
-var dsl_search_keyword_EPAM_url = 'http://localhost:9200/discovery/event/_search'
+var dsl_search_keyword_EPAM_url = 'http://9a10af202d21cb3e2ac605bb697085e2.us-west-1.aws.found.io:9200/discovery/event/_search'
 
 $( "#search_keyword_TM" ).click(function() {
   var url = search_keyword_TM_url + '&' + prepareGetParams(["#keyword1_TM"]);
