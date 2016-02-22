@@ -4,15 +4,12 @@ import com.epam.search.common.JsonHelper;
 import com.epam.search.requests.DslRequest;
 import com.epam.search.services.SearchService;
 import com.epam.search.services.SimpleSearchService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static com.epam.search.common.LoggingUtil.error;
 
 @RestController
 @RequestMapping("/discovery/v1/events")
@@ -98,11 +95,6 @@ public class EventResource {
     }
 
     private String prepareResponse(List<SearchService.SingleSearchResult> search, boolean pretty) {
-        try {
-            return JsonHelper.toJson(search, pretty);
-        } catch (JsonProcessingException e) {
-            error(this, e);
-            return "Error of processing, " + e.getMessage();
-        }
+        return JsonHelper.toJson(search, pretty);
     }
 }

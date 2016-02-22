@@ -88,7 +88,6 @@ public class RestSyncService extends ElasticService implements SyncService {
         });
     }
 
-
     private void insertEvents(Object[] events) throws UnknownHostException {
         info(this, "Trying save " + events.length + " events to Elasticsearch");
         TransportClient client = createClient();
@@ -103,13 +102,13 @@ public class RestSyncService extends ElasticService implements SyncService {
                 bulkRequest.add(client.prepareIndex(INDEX_NAME, "event")
                         .setSource(JsonHelper.toJson(event, false))
                         .setId(id));
-                if (count % 5 == 0) {
-                    bulkRequest.get();
-                    client.close();
-                    client = createClient();
-                    bulkRequest = client.prepareBulk();
-                    info(this, "Saved : " + count + " events");
-                }
+//                if (count % 5 == 0) {
+//                    bulkRequest.get();
+//                    client.close();
+//                    client = createClient();
+//                    bulkRequest = client.prepareBulk();
+//                    info(this, "Saved : " + count + " events");
+//                }
                 count++;
             } catch (Exception e) {
                 error(this, "Can't deserialize " + event);
@@ -118,7 +117,8 @@ public class RestSyncService extends ElasticService implements SyncService {
         BulkResponse bulkResponse = bulkRequest.get();
         if (bulkResponse.hasFailures()) {
             error(this, "Error saving data, " + bulkResponse.buildFailureMessage());
-
+        }  else {
+            info(this, "Saved : " + count + " events");
         }
         client.close();
         info(this, "Saved " + events.length + " events to Elasticsearch");

@@ -1,5 +1,6 @@
 package com.epam.search.processors;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -24,29 +25,32 @@ public class AdditionalInfoProcessor {
         GoogleProcessor googleProcessor = new GoogleProcessor();
         ContentProcessor contentProcessor = new ContentProcessor();
         GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
-        Set<String> images = googleProcessor.fetchImages(eventName);
-        AdditionInfo info = new AdditionInfo(google, images);
+        //Set<String> images = googleProcessor.fetchImages(eventName);
+        AdditionInfo info = new AdditionInfo();
+        info.setGoogleData(google);
         Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
         result.map(pr -> {
-            info.addImage(pr.getImage());
-            info.setDescription(pr.getDescription());
+            UniversePage page = new UniversePage();
+            page.addImage(pr.getImage());
+            page.setDescription(pr.getDescription());
+            info.setUniversePage(page);
             return "";
         });
+
         return info;
     }
 
 
     public static class AdditionInfo {
         private GoogleProcessor.GoogleResults.GoogleData googleData;
-        private Set<String> images;
-        private String description;
+        private UniversePage universePage;
 
         public AdditionInfo() {
         }
 
-        public AdditionInfo(GoogleProcessor.GoogleResults.GoogleData googleData, Set<String> images) {
+        public AdditionInfo(GoogleProcessor.GoogleResults.GoogleData googleData, UniversePage universePage) {
             this.googleData = googleData;
-            this.images = images;
+            this.universePage = universePage;
         }
 
         public GoogleProcessor.GoogleResults.GoogleData getGoogleData() {
@@ -55,6 +59,27 @@ public class AdditionalInfoProcessor {
 
         public void setGoogleData(GoogleProcessor.GoogleResults.GoogleData googleData) {
             this.googleData = googleData;
+        }
+
+        public UniversePage getUniversePage() {
+            return universePage;
+        }
+
+        public void setUniversePage(UniversePage universePage) {
+            this.universePage = universePage;
+        }
+    }
+
+    public static class UniversePage {
+        private Set<String> images = new HashSet<>();
+        private String description;
+
+        public UniversePage() {
+        }
+
+        public UniversePage(Set<String> images, String description) {
+            this.images = images;
+            this.description = description;
         }
 
         private void addImage(String image) {

@@ -6,7 +6,9 @@ import com.epam.search.services.GrabberService;
 import com.epam.search.services.SearchService;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -22,9 +24,9 @@ import static com.epam.search.common.LoggingUtil.info;
  * Created by Dmytro_Kovalskyi on 19.02.2016.
  */
 public class GrabberServiceImpl extends ElasticService implements GrabberService {
-    private int count = 0;
+    private volatile int count = 0;
 
-    private List<SearchService.SingleSearchResult> getAllEvents() throws Exception {
+    private List<SearchService.SingleSearchResult> getAllEvents2() throws Exception {
         long eventAmount = getEventCount();
         TransportClient client = createClient();
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
@@ -38,6 +40,27 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
         return searchResult.getResult();
     }
 
+    private List<SearchService.SingleSearchResult> getAllEvents() throws Exception {
+        List<SearchService.SingleSearchResult> results = new ArrayList<>();
+        TransportClient client = createClient();
+        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
+                .setQuery(QueryBuilders.matchAllQuery())
+                .setSearchType(SearchType.SCAN)
+                .setScroll(new TimeValue(90000))
+                .setSize(1000)
+                .execute()
+                .actionGet();
+        while (true) {
+            results.addAll(processSearchResult(response.getHits()));
+            response = client.prepareSearchScroll(response.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+            if (response.getHits().getHits().length == 0) {
+                break;
+            }
+        }
+        client.close();
+        return results;
+    }
+
     private long getEventCount() throws Exception {
         TransportClient client = createClient();
         CountResponse response = client.prepareCount(RestSyncService.INDEX_NAME)
@@ -48,14 +71,15 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     }
 
     private void processEvents(List<SearchService.SingleSearchResult> events) throws Exception {
-        for (SearchService.SingleSearchResult singleSearchResult : events) {
+        events.parallelStream().forEach(singleSearchResult->{
             Object event = processEvent(singleSearchResult.getSource());
             insertSingleEvent(JsonHelper.toJson(event, false), singleSearchResult.getId());
             count++;
             info(this, "Grabbed info for " + count + " events");
-        }
+        });
     }
 
+    @Override
     public void run() {
         tryable(() -> {
             List<SearchService.SingleSearchResult> events = getAllEvents();

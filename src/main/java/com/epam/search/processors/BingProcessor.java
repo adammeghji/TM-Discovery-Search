@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * Created by Dmytro_Kovalskyi on 19.02.2016.
  */
-public class BingProcessor {
+public class BingProcessor implements SearchProcessor{
     private static String APP_ID = "/HNLqUoeItY7U0frf5iORHgqh1OL4tbDtdrP/k+cvZk";
 
 //    static {
@@ -20,6 +20,7 @@ public class BingProcessor {
             "&Image.Offset=0&Image.Filters=Size:Medium";
 
     // Limit 7 queries per second
+    @Override
     public Set<String> fetchImages(String name) {
      //   System.out.println(SEARCH_URL);
         String forSearch = String.format(SEARCH_URL, name);

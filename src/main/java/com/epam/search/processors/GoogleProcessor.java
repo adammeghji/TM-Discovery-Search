@@ -1,7 +1,9 @@
 package com.epam.search.processors;
 
 import com.epam.search.common.JsonHelper;
+import com.epam.search.common.RequestHelper;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashSet;
@@ -14,7 +16,7 @@ import static com.epam.search.common.LoggingUtil.info;
 /**
  * Created by Dmytro_Kovalskyi on 19.02.2016.
  */
-public class GoogleProcessor {
+public class GoogleProcessor implements SearchProcessor {
     private static String address = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=";
     private static String charset = "UTF-8";
 
@@ -22,7 +24,7 @@ public class GoogleProcessor {
         GoogleResults result = new GoogleResults();
         try {
             URL url = new URL(address + URLEncoder.encode(eventName, charset));
-            result = JsonHelper.getMapper().readValue(url.openStream(), GoogleResults.class);
+            result = JsonHelper.getMapper().readValue(readData(url.openStream()), GoogleResults.class);
            // info(this, "Fetched info from google : " + result);
         } catch (Exception e) {
             error(this, e);
@@ -30,7 +32,11 @@ public class GoogleProcessor {
         return result.getResponseData();
     }
 
+    private String readData(InputStream stream) {
+        return RequestHelper.readResult(stream);
+    }
 
+    @Override
     public Set<String> fetchImages(String eventName) {
         Set<String> result = new HashSet<>();
         try {
