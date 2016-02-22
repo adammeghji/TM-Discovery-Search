@@ -16,7 +16,7 @@
     };
 
     var search_keyword_TM_url = 'https://app.ticketmaster.com/discovery/v1/events.json?apikey=7elxdku9GGG5k8j0Xm8KWdANDgecHMV0', // base URL for TM
-        search_keyword_EPAM_url = 'http://localhost:9200/discovery/event/_search', // base URL for EPAM
+        search_keyword_EPAM_url = 'http://9a10af202d21cb3e2ac605bb697085e2.us-west-1.aws.found.io:9200/discovery/event/_search', // base URL for EPAM
         spinner;
 
     $(document).ready(function(){
