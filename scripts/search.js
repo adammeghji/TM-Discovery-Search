@@ -75,7 +75,7 @@
                         "query": splitted[0],
                         "operator": "or",
                         "fuzziness": 2,
-                        "analyzer" : "my_synonyms2"
+                        "analyzer" : "my_synonyms"
                     }
                 }
             }
