@@ -74,7 +74,8 @@
                     "_all": {
                         "query": splitted[0],
                         "operator": "or",
-                        "fuzziness": 2
+                        "fuzziness": 2,
+                        "analyzer" : "my_synonyms2"
                     }
                 }
             }
@@ -82,7 +83,8 @@
                 EPAM_data_match[splitted[0]] = {
                     "query": splitted[1],
                     "operator": "or",
-                    "fuzziness": 2
+                    "fuzziness": 2,
+                    "analyzer" : "my_synonyms2"
                 };
             }
             EPAM_data = {
@@ -158,6 +160,7 @@
                 }
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
+
                 if (isEPAM){
                     runEPAMRequest(from + 20);
                 }
