@@ -47,8 +47,8 @@ public class AdditionalInfoProcessor {
     private AdditionInfo getAdditionalInfo(String eventName, String eventUrl) {
         AdditionInfo info = new AdditionInfo();
 
-        GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
-        info.setGoogleData(google);
+        //GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
+        //info.setGoogleData(google);
 
         Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
         if (!flickrImages.isEmpty()) {
