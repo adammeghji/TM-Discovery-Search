@@ -122,7 +122,7 @@
                     array = Object.byString(json, pathToArray), // get array of items
                     responseContainer = $('#response'), // column wrappoer in DOM
                     /*details column*/
-                    columnRight = $('<div class="row"></div>'),
+                    columnRight = $('<div class="list-group-item row"></div>'),
                     titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
                     responseDetailContainer = $('#response-detail'); // column wrappoer in DOM
 
