@@ -43,6 +43,7 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     private List<SearchService.SingleSearchResult> getAllEvents() throws Exception {
         List<SearchService.SingleSearchResult> results = new ArrayList<>();
         TransportClient client = createClient();
+        info(this, "Trying to get all events");
         SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
                 .setSearchType(SearchType.SCAN)
@@ -50,9 +51,20 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
                 .setSize(1000)
                 .execute()
                 .actionGet();
+        int counter = 0;
+        int hits = 0;
+        int total = 0;
         while (true) {
-            results.addAll(processSearchResult(response.getHits()));
+            counter++;
+            hits = response.getHits().getHits().length;
+            total += hits;
+            info(this, "addAll ... hits=" + hits + " total="+ total +"   #" + counter);
+            if (counter < 2) {
+                info(this,"SKIP");
+                results.addAll(processSearchResult(response.getHits()));
+            }
             response = client.prepareSearchScroll(response.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+            info(this, "... hits=" + hits + " total="+ total +"   #" + counter);
             if (response.getHits().getHits().length == 0) {
                 break;
             }

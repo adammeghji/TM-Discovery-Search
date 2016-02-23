@@ -57,9 +57,9 @@ public class RestSyncService extends ElasticService implements SyncService {
 
     public void load() {
         tryable(() -> {
-            load(0);
+            load(60);
         });
-        count = 0;
+        count = 60;
     }
 
     private boolean fileExist(String folder, int pageNumber) {
@@ -159,8 +159,8 @@ public class RestSyncService extends ElasticService implements SyncService {
     @Override
     public void preload() {
         RestSyncService service = new RestSyncService();
-        service.removeIndex();
-        service.createIndex();
+        //service.removeIndex();
+        //service.createIndex();
         service.enableMapping();
         service.load();
     }
