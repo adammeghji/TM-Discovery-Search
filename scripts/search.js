@@ -109,8 +109,12 @@
         // column constructor for TM
         var Column = function(json, pathToArray, url, isEPAM, from){
             var self = this;
-            self.page = isEPAM ? (from+1)/20 : parseInt(json['page']['number']); //current page number (taken from json)
-            self.totalPages = isEPAM ? Math.floor(parseInt(json['total'] / 20)) : parseInt(json['page']['totalPages']); // total page number (taken from json)
+            //console.log('totalPages', Math.floor(parseInt(json['hits']['total'])) );
+            self.page = isEPAM ? from : parseInt(json['page']['number']); //current page number (taken from json)
+            self.totalPages = isEPAM ? Math.floor(parseInt(json['hits']['total']) /20 )  : parseInt(json['page']['totalPages']); // total page number (taken from json)
+            console.log('self.paging', self.page,' of ',self.totalPages);
+            //self.max_score = isEPAM ? (parseFloat(json['hits']['max_score'])) || 'none' : 'default';
+            //console.log('self.max_score',self.max_score);
             self.url = url; // base url (with API key and keyword) without page parameter
             self.render = function(){
                 var column = $('<div class="list-group"></div>'), // column wrapper
@@ -137,7 +141,7 @@
                 self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
                 self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
                 self.paging = $('<p id="paging">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</p>'); // display current page of total
-                responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three above to column
+                responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
             };
             self.setListeners = function(){
                 self.previousPage.on('click', function(e){ // previous button click listener
@@ -151,27 +155,30 @@
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
                 if (isEPAM){
-                    runEPAMRequest(from - 20)
+                    runEPAMRequest(from - 1);
+                    return;
                 }
-                else {
-                    sendRequest(self.url + '&page=' + (self.page - 1), function(response){
-                        new Column(response, pathToArray, self.url, isEPAM);
-                    });
-                }
+                sendRequest(self.url + '&page=' + (self.page - 1), 'GET', null, function(response){
+                    new Column(response, pathToArray, self.url, isEPAM);
+                });
+
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
 
                 if (isEPAM){
-                    runEPAMRequest(from + 20);
+                    runEPAMRequest(from + 1);
+                    return;
                 }
-                /*
-                console.log('self.goToNextPage pressed','isEPAM:',isEPAM);
-                console.log('self.url', self.url);
-                console.log('self.page + 1', self.page + 1);
-                */
-                //TODO sendRequest() error
-                sendRequest(self.url + '&page=' + (self.page + 1), function(response){
-                    console.log('***build new column');
+                //console.log('self.goToNextPage pressed','isEPAM:',isEPAM);
+                //console.log('new url', url);
+                /**
+                 * @url -string
+                 * @method - string
+                 * data - object
+                 * callback - function
+                 */
+                sendRequest(self.url + '&page=' + (self.page + 1), 'GET', null ,function(response){
+                    //console.log('***build new column',response);
                     new Column(response, pathToArray, self.url, isEPAM);
                 });
             };
@@ -187,6 +194,8 @@
         //universal ajax request sender
         var sendRequest = function(url, method, data, callback){
             spinner.show();
+            console.info('data' , data, 'method,',method);
+            console.info('url' , url);
             $.ajax({
                 type: method,
                 url: url,
