@@ -24,9 +24,12 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+
     </repositories>
 
     <dependencies>
+
+
 
         <dependency>
             <groupId>junit</groupId>
@@ -162,6 +165,13 @@
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <!-- add the shield jar as a dependency -->
+        <dependency>
+            <groupId>org.elasticsearch.plugin</groupId>
+            <artifactId>shield</artifactId>
             <version>2.2.0</version>
         </dependency>
 
