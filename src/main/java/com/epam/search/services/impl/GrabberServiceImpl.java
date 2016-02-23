@@ -61,6 +61,25 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
         return results;
     }
 
+    private List<SearchService.SingleSearchResult> getAllEvents(int from, int to) throws Exception {
+        if (to < from)
+            throw new IllegalArgumentException("to param should be greater than from param");
+
+        List<SearchService.SingleSearchResult> results = new ArrayList<>();
+        TransportClient client = createClient();
+        int size = to - from;
+        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
+                .setQuery(QueryBuilders.matchAllQuery())
+                .setSize(size)
+                .setFrom(from)
+                .execute()
+                .actionGet();
+        results.addAll(processSearchResult(response.getHits()));
+
+        client.close();
+        return results;
+    }
+
     private long getEventCount() throws Exception {
         TransportClient client = createClient();
         CountResponse response = client.prepareCount(RestSyncService.INDEX_NAME)
@@ -71,7 +90,7 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     }
 
     private void processEvents(List<SearchService.SingleSearchResult> events) throws Exception {
-        events.parallelStream().forEach(singleSearchResult->{
+        events.parallelStream().forEach(singleSearchResult -> {
             Object event = processEvent(singleSearchResult.getSource());
             insertSingleEvent(JsonHelper.toJson(event, false), singleSearchResult.getId());
             count++;
@@ -109,5 +128,19 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     public static void main(String[] args) {
         GrabberServiceImpl grabber = new GrabberServiceImpl();
         grabber.run();
+    }
+
+    @Override
+    public void grab(int from, int to) {
+        tryable(() -> {
+            List<SearchService.SingleSearchResult> events = getAllEvents(from, to);
+            info(this, "Trying to process " + events.size() + " events from # " + from + " to #" + to);
+            processEvents(events);
+        });
+    }
+
+    @Override
+    public void grab(int from) {
+        grab(from, from + 100);
     }
 }
