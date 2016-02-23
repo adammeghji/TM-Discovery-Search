@@ -153,7 +153,7 @@
                         }
                     }
                     /*test id 2900502CFF8309E2*/
-                    if (itemInfo.universePage ) { // apend img if it exist
+                    if (itemInfo.universePage && itemInfo.flickrImages) { // apend img if it exist
                         var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description+ '</h1>');
                         columnRight.append(description).append($('<div class="col-xs-12"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"></div>'));
 
