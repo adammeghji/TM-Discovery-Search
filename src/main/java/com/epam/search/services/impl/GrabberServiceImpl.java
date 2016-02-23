@@ -58,13 +58,13 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
             counter++;
             hits = response.getHits().getHits().length;
             total += hits;
-            info(this, "addAll ... hits=" + hits + " total="+ total +"   #" + counter);
+            info(this, "addAll ... hits=" + hits + " total=" + total + "   #" + counter);
             if (counter < 2) {
-                info(this,"SKIP");
+                info(this, "SKIP");
                 results.addAll(processSearchResult(response.getHits()));
             }
             response = client.prepareSearchScroll(response.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
-            info(this, "... hits=" + hits + " total="+ total +"   #" + counter);
+            info(this, "... hits=" + hits + " total=" + total + "   #" + counter);
             if (response.getHits().getHits().length == 0) {
                 break;
             }
@@ -153,6 +153,13 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
 
     @Override
     public void grab(int from) {
-        grab(from, from + 100);
+        boolean completed = false;
+        int fromNumber = from;
+        while (!completed) {
+            grab(fromNumber, fromNumber + 100);
+            fromNumber += 100;
+            if (fromNumber >= 70000)
+                completed = true;
+        }
     }
 }

@@ -9,7 +9,7 @@ import com.epam.search.services.impl.GrabberServiceImpl;
 public class DataGrabber {
     public static void main(String[] args) throws InterruptedException {
         GrabberService service = new GrabberServiceImpl();
-        service.grab(0,100);
-        service.grab(100);
+      //  service.grab(0,100);
+        service.grab(97);
     }
 }
