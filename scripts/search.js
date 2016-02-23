@@ -138,8 +138,8 @@
 
                         itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, // item URL
                         itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
-                    console.log('itemInfo',itemInfo);
-                    console.log('itemInfo',(itemInfo) ? itemInfo.flickrImages : 'none');
+                    /*console.log('itemInfo',itemInfo);
+                    console.log('itemInfo',(itemInfo) ? itemInfo.flickrImages : 'none');*/
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
