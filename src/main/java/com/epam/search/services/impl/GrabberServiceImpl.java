@@ -102,20 +102,11 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     }
 
     private void processEvents(List<SearchService.SingleSearchResult> events) throws Exception {
-        events.parallelStream().forEach(singleSearchResult -> {
+        events.stream().forEach(singleSearchResult -> {
             Object event = processEvent(singleSearchResult.getSource());
             insertSingleEvent(JsonHelper.toJson(event, false), singleSearchResult.getId());
             count++;
             info(this, "Grabbed info for " + count + " events");
-        });
-    }
-
-    @Override
-    public void run() {
-        tryable(() -> {
-            List<SearchService.SingleSearchResult> events = getAllEvents();
-            info(this, "Trying to process " + events.size() + " events");
-            processEvents(events);
         });
     }
 
@@ -135,11 +126,6 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
             result.add(singleResult);
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        GrabberServiceImpl grabber = new GrabberServiceImpl();
-        grabber.run();
     }
 
     @Override

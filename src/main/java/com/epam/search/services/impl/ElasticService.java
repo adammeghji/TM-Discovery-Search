@@ -3,16 +3,15 @@ package com.epam.search.services.impl;
 import com.epam.search.common.Config;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.shield.ShieldPlugin;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import static com.epam.search.common.LoggingUtil.error;
 import static com.epam.search.common.LoggingUtil.info;
-
-import org.elasticsearch.shield.ShieldPlugin;
 
 /**
  * Created by Dmytro_Kovalskyi on 19.02.2016.
@@ -25,7 +24,7 @@ public abstract class ElasticService {
                 .get();
     }
 
-    protected IndexResponse insertSingleEvent(String eventJson, String id) {
+    protected void insertSingleEvent(String eventJson, String id) {
         TransportClient client = createClient();
         info(this, "Inserts : " + eventJson);
         IndexResponse response = client.prepareIndex(Config.INDEX_NAME, Config.EVENT_TYPE)
@@ -33,7 +32,6 @@ public abstract class ElasticService {
                 .setId(id)
                 .get();
         client.close();
-        return response;
     }
 
     protected TransportClient createClient() {

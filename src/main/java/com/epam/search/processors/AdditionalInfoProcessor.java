@@ -1,10 +1,13 @@
 package com.epam.search.processors;
 
+import com.epam.search.common.JsonHelper;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.epam.search.common.LoggingUtil.info;
 import static org.apache.http.util.TextUtils.isBlank;
 
 /**
@@ -19,9 +22,26 @@ public class AdditionalInfoProcessor {
         String eventName = (String) event.get("name");
         String eventUrl = (String) event.get("eventUrl");
         AdditionInfo additionalInfo = getAdditionalInfo(eventName, eventUrl);
-
-        event.put("info", additionalInfo);
+        AdditionInfo merged = merge(event, additionalInfo);
+        info(this, "MERGE RESULT : " + merged);
+        event.put("info", merged);
         return event;
+    }
+
+    private AdditionInfo merge(Map<String, Object> event, AdditionInfo additionalInfo) {
+        if (!event.containsKey("info"))
+            return additionalInfo;
+        AdditionInfo merged = JsonHelper.getMapper().convertValue(event.get("info"), AdditionInfo.class);
+        if (!additionalInfo.getGoogleData().isEmpty()) {
+            merged.setGoogleData(additionalInfo.googleData);
+        }
+        if (additionalInfo.flickrImages != null && !additionalInfo.flickrImages.isEmpty()) {
+            merged.setFlickrImages(additionalInfo.flickrImages);
+        }
+        if (additionalInfo.getUniversePage() != null) {
+            merged.setUniversePage(additionalInfo.getUniversePage());
+        }
+        return merged;
     }
 
     private AdditionInfo getAdditionalInfo(String eventName, String eventUrl) {
@@ -84,6 +104,16 @@ public class AdditionalInfoProcessor {
         public void setFlickrImages(Set<String> flickrImages) {
             this.flickrImages = flickrImages;
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("AdditionInfo{");
+            sb.append("googleData=").append(googleData);
+            sb.append(", universePage=").append(universePage);
+            sb.append(", flickrImages=").append(flickrImages);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     public static class UniversePage {
@@ -118,6 +148,15 @@ public class AdditionalInfoProcessor {
 
         public void setImages(Set<String> images) {
             this.images = images;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("UniversePage{");
+            sb.append("images=").append(images);
+            sb.append(", description='").append(description).append('\'');
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

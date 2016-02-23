@@ -25,7 +25,7 @@ public class GoogleProcessor implements SearchProcessor {
         try {
             URL url = new URL(address + URLEncoder.encode(eventName, charset));
             result = JsonHelper.getMapper().readValue(readData(url.openStream()), GoogleResults.class);
-           // info(this, "Fetched info from google : " + result);
+            info(this, "Fetched info from google : " + result);
         } catch (Exception e) {
             error(this, e);
         }
@@ -41,7 +41,7 @@ public class GoogleProcessor implements SearchProcessor {
         String query = "https://www.google.com.ua/search?q=prague&safe=off&hs=MrB&source=lnms&tbm=isch";
         Set<String> result = new HashSet<>();
         try {
-            RequestHelper.saveToFile("D:\\google.html",RequestHelper.executeRequest(query));
+            RequestHelper.saveToFile("D:\\google.html", RequestHelper.executeRequest(query));
 
         } catch (Exception e) {
             error(this, e);
@@ -71,6 +71,7 @@ public class GoogleProcessor implements SearchProcessor {
             return "GoogleData[" + responseData + "]";
         }
 
+
         static class GoogleData {
             private List<Result> results;
 
@@ -85,6 +86,11 @@ public class GoogleProcessor implements SearchProcessor {
             public String toString() {
                 return "Results[" + results + "]";
             }
+
+            public boolean isEmpty() {
+                return results == null || results.isEmpty();
+            }
+
         }
 
         static class Result {

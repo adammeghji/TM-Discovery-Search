@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import static com.epam.search.common.LoggingUtil.error;
 import static com.epam.search.common.LoggingUtil.info;
 import static com.epam.search.common.RequestHelper.executeRequest;
+import static org.apache.http.util.TextUtils.isBlank;
 
 /**
  * Created by Dmytro_Kovalskyi on 19.02.2016.
@@ -20,6 +21,8 @@ public class ContentProcessor {
 
     public static final String UNIVERSE_SITE = "www.universe.com/events";
     public static final String TICKETWEB_SITE = "www.ticketweb.com";
+    public static final String LIVENATION_SITE = "concerts.livenation.com";
+    public static final String TICKETFLY_SITE = "www.ticketfly.com";
 
     public Optional<ParseResult> fetchContent(String url) {
         return getPageContent(url).flatMap(c -> parseContent(c, url));
@@ -29,35 +32,62 @@ public class ContentProcessor {
         Optional<ParseResult> result = Optional.empty();
         try {
             if (url.contains(UNIVERSE_SITE)) {
-                result = parseUniverse(content, result);
+                result = parseUniverse(content);
             } else if (url.contains(TICKETWEB_SITE)) {
-                result = parseTicketWeb(content, result);
-            } else {
-                info(this, "Can't parse url that doesn't contains " + UNIVERSE_SITE + "\n URL : " + url);
-                return Optional.empty();
+                result = parseTicketWeb(content);
+            } else if (url.contains(LIVENATION_SITE)) {
+                result = parseLivenation(content);
+            } else if (url.contains(TICKETFLY_SITE)) {
+                result = parseTicketFly(content);
+            }else {
+                result = genericParse(content, url);
             }
         } catch (Exception e) {
             error(this, e);
         }
+
         return result;
     }
 
-    private Optional<ParseResult> parseTicketWeb(String content, Optional<ParseResult> result) {
+    private Optional<ParseResult> parseTicketFly(String content) {
+        Document document = Jsoup.parse(content);
+        String description = document.select("meta[name=description]").attr("content");
+        String url = document.select("#image img").attr("src");
+        String finalUrl = url;
+        if(url.contains("?")) { // to load max size picture
+            finalUrl = url.substring(0, url.indexOf("?"));
+        }
+        return Optional.of(new ParseResult(description, finalUrl));
+    }
+
+    private Optional<ParseResult> parseLivenation(String content) {
+        return genericParse(content);
+    }
+    private Optional<ParseResult> genericParse(String content) {
+        return genericParse(content, null);
+    }
+
+    private Optional<ParseResult> genericParse(String content, String url) {
         Document document = Jsoup.parse(content);
         String description = document.select("meta[property=og:description]").attr("content");
 
         String image = document.select("meta[property=og:image]").attr("content");
-        result = Optional.of(new ParseResult(description, image));
-        return result;
+        if(isBlank(image) && url != null)  {
+            error(this, "SHOULD ADD PARSER TO : " + url);
+        }
+        return Optional.of(new ParseResult(description, image));
     }
 
-    private Optional<ParseResult> parseUniverse(String content, Optional<ParseResult> result) {
+    private Optional<ParseResult> parseTicketWeb(String content) {
+        return genericParse(content);
+    }
+
+    private Optional<ParseResult> parseUniverse(String content) {
         Document document = Jsoup.parse(content);
         String description = document.select("meta[property=og:description]").attr("content");
 
         String image = document.select("meta[name=twitter:image]").attr("content");
-        result = Optional.of(new ParseResult(description, image));
-        return result;
+        return Optional.of(new ParseResult(description, image));
     }
 
     private Optional<String> getPageContent(String eventUrl) {
