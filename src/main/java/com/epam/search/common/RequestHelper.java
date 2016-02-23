@@ -8,9 +8,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.stream.Collectors;
 
 import static com.epam.search.common.LoggingUtil.error;
@@ -44,5 +45,14 @@ public class RequestHelper {
             error(RequestHelper.class, "Content unavailable for : " + inputStream);
             return "";
         }
+    }
+
+    public static void saveToFile(String fileName, InputStream stream) throws IOException {
+        Path targetPath = new File(fileName).toPath();
+        if (!Files.exists(targetPath.getParent())) {
+            Files.createDirectories(targetPath.getParent());
+        }
+        Files.copy(stream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        stream.close();
     }
 }

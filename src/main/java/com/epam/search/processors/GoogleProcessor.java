@@ -38,13 +38,21 @@ public class GoogleProcessor implements SearchProcessor {
 
     @Override
     public Set<String> fetchImages(String eventName) {
+        String query = "https://www.google.com.ua/search?q=prague&safe=off&hs=MrB&source=lnms&tbm=isch";
         Set<String> result = new HashSet<>();
         try {
+            RequestHelper.saveToFile("D:\\google.html",RequestHelper.executeRequest(query));
+
         } catch (Exception e) {
             error(this, e);
         }
         info(this, "Fetched images from google : " + result);
         return result;
+    }
+
+    public static void main(String[] args) {
+        GoogleProcessor processor = new GoogleProcessor();
+        processor.fetchImages("");
     }
 
     public static class GoogleResults {

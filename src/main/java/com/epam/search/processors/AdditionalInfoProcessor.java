@@ -11,6 +11,9 @@ import static org.apache.http.util.TextUtils.isBlank;
  * Created by Dmytro_Kovalskyi on 19.02.2016.
  */
 public class AdditionalInfoProcessor {
+    private GoogleProcessor googleProcessor = new GoogleProcessor();
+    private ContentProcessor contentProcessor = new ContentProcessor();
+    private SearchProcessor flickrProcessor = new FlickrProcessor();
 
     public Object process(Map<String, Object> event) {
         String eventName = (String) event.get("name");
@@ -22,12 +25,16 @@ public class AdditionalInfoProcessor {
     }
 
     private AdditionInfo getAdditionalInfo(String eventName, String eventUrl) {
-        GoogleProcessor googleProcessor = new GoogleProcessor();
-        ContentProcessor contentProcessor = new ContentProcessor();
-        GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
-        //Set<String> images = googleProcessor.fetchImages(eventName);
         AdditionInfo info = new AdditionInfo();
+
+        GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
         info.setGoogleData(google);
+
+        Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
+        if (!flickrImages.isEmpty()) {
+            info.setFlickrImages(flickrImages);
+        }
+
         Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
         result.map(pr -> {
             UniversePage page = new UniversePage();
@@ -44,6 +51,7 @@ public class AdditionalInfoProcessor {
     public static class AdditionInfo {
         private GoogleProcessor.GoogleResults.GoogleData googleData;
         private UniversePage universePage;
+        private Set<String> flickrImages;
 
         public AdditionInfo() {
         }
@@ -67,6 +75,14 @@ public class AdditionalInfoProcessor {
 
         public void setUniversePage(UniversePage universePage) {
             this.universePage = universePage;
+        }
+
+        public Set<String> getFlickrImages() {
+            return flickrImages;
+        }
+
+        public void setFlickrImages(Set<String> flickrImages) {
+            this.flickrImages = flickrImages;
         }
     }
 

@@ -102,13 +102,6 @@ public class RestSyncService extends ElasticService implements SyncService {
                 bulkRequest.add(client.prepareIndex(INDEX_NAME, "event")
                         .setSource(JsonHelper.toJson(event, false))
                         .setId(id));
-//                if (count % 5 == 0) {
-//                    bulkRequest.get();
-//                    client.close();
-//                    client = createClient();
-//                    bulkRequest = client.prepareBulk();
-//                    info(this, "Saved : " + count + " events");
-//                }
                 count++;
             } catch (Exception e) {
                 error(this, "Can't deserialize " + event);
