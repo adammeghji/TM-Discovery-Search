@@ -120,7 +120,11 @@
                 var column = $('<div class="list-group"></div>'), // column wrapper
                     title = $('<a class="list-group-item active">Events</a>'), // column header
                     array = Object.byString(json, pathToArray), // get array of items
-                    responseContainer = $('#response'); // column wrappoer in DOM
+                    responseContainer = $('#response'), // column wrappoer in DOM
+                    /*details column*/
+                    columnRight = $('<div class="row"></div>'),
+                    titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
+                    responseDetailContainer = $('#response-detail'); // column wrappoer in DOM
 
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
@@ -130,11 +134,31 @@
                         leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
                         name = $('<div>' + '<b>name: </b>' + (isEPAM ? array[item]['_source']['name'] : array[item].name) + '</div>'), // item name
                         id = $('<div>' + '<b>id : </b>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
-                        itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl; // item URL
+
+
+                        itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, // item URL
+                        itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+                    console.log('itemAttractions',itemInfo);
+                    console.log('itemAttractions',(itemInfo) ? itemInfo.flickrImages : 'none');
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
                         leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
+
+                    if (itemInfo) { // apend img if it exist
+                        var cropImg = $('<div class="col-xs-4"></div>'); // wrapper img
+
+                        for(var i=0; i<itemInfo.length, i<3; i++){
+                         columnRight.append($('<div class="crop-image col-xs-4"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
+                        }
+                    }
+                    /*test id 2900502CFF8309E2*/
+                    if (itemInfo.universePage) { // apend img if it exist
+                        var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description+ '</h1>');
+                        columnRight.append(description).append($('<div class="col-xs-12"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"></div>'));
+
+                    }
+
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
                 }
@@ -142,6 +166,11 @@
                 self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
                 self.paging = $('<p id="paging">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</p>'); // display current page of total
                 responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
+
+                /*right column*/
+                responseDetailContainer.empty(); // remove any previous columns
+                responseDetailContainer.append(titleRight).append(columnRight);
+                self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
             self.setListeners = function(){
                 self.previousPage.on('click', function(e){ // previous button click listener
