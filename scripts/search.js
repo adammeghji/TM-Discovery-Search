@@ -138,14 +138,14 @@
 
                         itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, // item URL
                         itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
-                    console.log('itemAttractions',itemInfo);
-                    console.log('itemAttractions',(itemInfo) ? itemInfo.flickrImages : 'none');
+                    console.log('itemInfo',itemInfo);
+                    console.log('itemInfo',(itemInfo) ? itemInfo.flickrImages : 'none');
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
                         leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
 
-                    if (itemInfo) { // apend img if it exist
+                    if (itemInfo.flickrImages) { // apend img if it exist
                         var cropImg = $('<div class="col-xs-4"></div>'); // wrapper img
 
                         for(var i=0; i<itemInfo.length, i<3; i++){
@@ -153,7 +153,7 @@
                         }
                     }
                     /*test id 2900502CFF8309E2*/
-                    if (itemInfo.universePage) { // apend img if it exist
+                    if (itemInfo.universePage ) { // apend img if it exist
                         var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description+ '</h1>');
                         columnRight.append(description).append($('<div class="col-xs-12"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"></div>'));
 
