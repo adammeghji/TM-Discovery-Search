@@ -127,14 +127,14 @@
 
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row"></a>'), // item wrapper
-                        leftColumn = $('<div class="col-xs-4"></div>'), // wrapper left column
-                        name = $('<div>' + (isEPAM ? array[item]['_source']['name'] : array[item].name) + '</div>'), // item name
-                        id = $('<div>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
+                        leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
+                        name = $('<div>' + '<b>name: </b>' + (isEPAM ? array[item]['_source']['name'] : array[item].name) + '</div>'), // item name
+                        id = $('<div>' + '<b>id : </b>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
                         itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl; // item URL
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
-                        leftColumn.append($('<a target="_blank" href="' + itemUrl + '">Link to TM</div>'));
+                        leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
                 }
@@ -194,8 +194,8 @@
         //universal ajax request sender
         var sendRequest = function(url, method, data, callback){
             spinner.show();
-            console.info('data' , data, 'method,',method);
-            console.info('url' , url);
+            console.info('dataSend:' , data);
+
             $.ajax({
                 type: method,
                 url: url,
@@ -203,6 +203,7 @@
                 data: data ? JSON.stringify(data) : "",
                 success: function(response, textStatus, jqXHR) {
                     spinner.hide();
+                    console.info('response ' , response);
                     callback(response);
                 },
                 error: function(xhr, status, err) {
