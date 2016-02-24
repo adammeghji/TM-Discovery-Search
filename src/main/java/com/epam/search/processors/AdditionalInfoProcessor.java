@@ -86,6 +86,13 @@ public class AdditionalInfoProcessor {
                 info.setWikiVenues(newWikiVenues);
             }
         }
+        if (original.attractions == null || original.attractions.isEmpty()) {
+            info(this, "call TM processor");
+            Set<TMProcessor.ArtistInfo> newAttractions = tmProcessor.fetchAttractionInfo(attractions);
+            if (!newAttractions.isEmpty()) {
+                info.setAttractions(newAttractions);
+            }
+        }
 
         if (original.getUniversePage() == null) {
             info(this, "call Content processor");

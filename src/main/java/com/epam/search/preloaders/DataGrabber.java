@@ -10,6 +10,6 @@ public class DataGrabber {
     public static void main(String[] args) throws InterruptedException {
         GrabberService service = new GrabberServiceImpl();
       //  service.grab(0,100);
-        service.grab(1700);
+        service.grab(2700);
     }
 }

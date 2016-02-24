@@ -3,6 +3,7 @@ package com.epam.search.processors;
 import com.epam.search.common.RequestHelper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,11 +31,12 @@ public class TMProcessor {
     private Optional<ArtistInfo> fetchArtistInfo(String name, String subUrl) {
         String url = buildAttractionUrl(subUrl);
         String result = RequestHelper.readResult(RequestHelper.executeRequest(url));
-        RequestHelper.saveToFile("D:\\tm.html", result);
         info(this, "Trying to fetch data from : " + url);
         String biography = parseContent(result);
         if (isBlank(biography)) {
             return Optional.empty();
+        } else {
+            info(this, "TicketMaster fetched for : " + name + "\t" + biography);
         }
         ArtistInfo info = new ArtistInfo(name, biography);
         return Optional.of(info);
@@ -42,7 +44,12 @@ public class TMProcessor {
 
     private String parseContent(String content) {
         Document document = Jsoup.parse(content);
-        return document.select("meta[property=og:biography]").attr("content");
+        String result = "";
+        Elements select = document.select("#swap-synopsis p");
+        if (select.size() != 0) {
+            result = select.toString();
+        }
+        return result;
     }
 
     private String buildAttractionUrl(String subUrl) {
