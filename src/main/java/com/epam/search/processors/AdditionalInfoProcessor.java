@@ -45,8 +45,21 @@ public class AdditionalInfoProcessor {
             info(this, "got Flickr");
             merged.setFlickrImages(additionalInfo.flickrImages);
         }
+
+        if (additionalInfo.wikiAttractions != null && !additionalInfo.wikiAttractions.isEmpty()) {
+            info(this, "got WIKI Attraction processor");
+            merged.setWikiAttractions(additionalInfo.getWikiAttractions());
+        }
+
+        if (additionalInfo.wikiVenues != null && !additionalInfo.wikiVenues.isEmpty()) {
+            info(this, "got WIKI Venues processorr");
+            merged.setWikiVenues(additionalInfo.getWikiVenues());
+        }
+
+
+
         if (additionalInfo.getUniversePage() != null) {
-            info(this, "got TM");
+            info(this, "got Content processor");
             merged.setUniversePage(additionalInfo.getUniversePage());
         }
         return merged;
