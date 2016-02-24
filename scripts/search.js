@@ -153,10 +153,13 @@
                     /*details column*/
                     columnRight = $('<div class="list-group-item row"></div>'),
                     titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
-                    responseDetailContainer = $('#response-detail'); // column wrappoer in DOM
+                    responseDetailContainer = $('#response-detail'), // column wrappoer in DOM
+                    $googleMap = '<div id="js_google_map" class="google_map"></div>';
 
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
+
+                columnRight.append($googleMap);  // append Google maps
 
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
@@ -193,6 +196,8 @@
                 responseDetailContainer.append(titleRight).append(columnRight);
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
+
+
             self.renderCardDetail = function(responseDetailContainer){
                 var array = Object.byString(json, pathToArray), // get array of items
                     /*details column*/
@@ -265,7 +270,34 @@
                     new Column(response, pathToArray, self.url, isEPAM);
                 });
             };
+
+            self.initGroupEventsMap = function(){
+                var array = Object.byString(json, pathToArray),
+                    center = {lat: 39.3648338, lng: -101.4381589},
+                    map = new google.maps.Map(document.getElementById('js_google_map'), {
+                        center: center,
+                        zoom: 4
+                    });
+
+                for (var item in array){
+                    var location = array[item]['_source'].location;
+                    //console.log(location);
+                    if(location){
+                        new google.maps.Marker({
+                            position: {
+                                lat: location.lat,
+                                lng: location.lon
+                            },
+                            map: map
+                        });
+                    }
+                }
+
+                return map;
+            };
+
             self.render();
+            self.initGroupEventsMap();
             self.setListeners();
         };
 
