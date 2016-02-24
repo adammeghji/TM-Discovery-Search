@@ -181,7 +181,7 @@
                     title = $('<a class="list-group-item active">Events</a>'), // column header
                     array = Object.byString(json, pathToArray), // get array of items
                     responseContainer = $('#response'), // column wrappoer in DOM
-                    /*details column*/
+                /*details column*/
                     columnRight = $('<div class="list-group-item row"></div>'),
                     titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
                     responseDetailContainer = $('#response-detail'), // column wrappoer in DOM
@@ -229,23 +229,53 @@
                 responseDetailContainer.append(titleRight).append(columnRight);
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
-
-
-            self.renderCardDetail = function(responseDetailContainer){
+            self.renderCardDetail = function(responseDetailContainer , idDetail){
+                var eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
                 var array = Object.byString(json, pathToArray), // get array of items
-                    /*details column*/
+                /*details column*/
                     cardSingleRight = $('<div class="list-group-item row"></div>'),
                     titleCard = $('<a class="list-group-item active">Single card details</a>'); // column header
 
                 responseDetailContainer.append(titleCard);
                 for (var item in array){
-                    var itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
-                    console.log('item',item);
-                    //cardSingleRight
-                    if(itemInfo) {
-                        itemInfoShow(itemInfo, leftColumn , columnRight, itemUrl);
-                    };
-                };
+                    var idList = isEPAM ? array[item]['_source']['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
+                        itemAttractions = isEPAM ? array[item]['_source']['_embedded']['attractions'] : 'not used in TM', //override item URL
+                        itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+
+                    //render cardSingleRight
+                    if(idList === idDetail) {
+                        console.log('fount id in list', idList , idDetail);
+                        if (itemInfo.flickrImages) { // apend img if it exist
+                            responseDetailContainer.append($('<div class="col-xs-6 double-height"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"><span>flick img 01</span></div>'));
+
+                            for(var i=1; i<itemInfo.length, i<3; i++){
+                                if(!itemInfo.flickrImages[i]) continue;
+                                responseDetailContainer.append($('<div class="crop-image-flick col-xs-6"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
+                            }
+                        }
+                        console.log('itemAttractions' , itemAttractions[0].image.url);
+
+                        if (itemAttractions[0].image.url) { // apend img if it exist
+                            console.log('itemAttractions' ,itemAttractions[0].image.url);
+                            eventPicHost += itemAttractions[0].image.url;
+                            responseDetailContainer.append($('<div class="double-height col-xs-12"><img src=" '+eventPicHost+'" class="img-responsive"><span>attraction img</span></div>' ));
+
+                            if( itemAttractions[1] ) {
+                                eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
+                                eventPicHost += itemAttractions[1].image.url;
+                                responseDetailContainer.append($('<div class="double-height col-xs-6"><img src=" ' + eventPicHost + '" class="img-responsive"></div>'));
+                            }
+
+                            for(var i=1; i<itemAttractions.length, i<3; i++){
+                                console.log('itemAttractions-url ' , itemAttractions[i]);
+
+                            }
+                        }
+
+                    }
+
+                }
+                responseDetailContainer.append($('<hr>'));
             };
             self.setListeners = function(){
                 self.previousPage.on('click', function(e){ // previous button click listener
@@ -257,20 +287,16 @@
                     self.goToNextPage();
                 });
                 $('.js_left_list').on('click', function(e){ // list-group-item listener
+                    var responseDetailContainer = $('#response-detail'),
+                        idDetail = $(this).data('id');
+
                     e.preventDefault();
-                    console.log($(this).data('id'));
-                    console.log('current elem: ', event.target.nodeName );
-                    var self = this;
-                    console.log('this.attr("id"): ', self.id );
-                    var responseDetailContainer = $('#response-detail');
+
                     responseDetailContainer.fadeOut(200, function() {
                         $(this).empty().show();
                         responseDetailContainer.fadeIn("slow");
 
-                        responseDetailContainer.append( $(self).attr('id') );
-
-                        responseDetailContainer.append( $('<p>current item details here</div>'));
-                        //self.renderCardDetail(responseDetailContainer);
+                        self.renderCardDetail(responseDetailContainer, idDetail);
                     });
                 });
             };
