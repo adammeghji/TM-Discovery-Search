@@ -71,7 +71,7 @@
 
             if (splitted.length === 1){
                 EPAM_data_match = {
-                    "_all": {
+                    "name": {
                         "query": splitted[0],
                         "operator": "or",
                         "fuzziness": 2,
@@ -196,8 +196,6 @@
                 responseDetailContainer.append(titleRight).append(columnRight);
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
-
-
             self.renderCardDetail = function(responseDetailContainer , idDetail){
                 var array = Object.byString(json, pathToArray), // get array of items
                     /*details column*/
