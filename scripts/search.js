@@ -109,7 +109,11 @@
         // column constructor for TM
         var Column = function(json, pathToArray, url, isEPAM, from){
             var self = this;
-            //console.log('totalPages', Math.floor(parseInt(json['hits']['total'])) );
+
+            function itemInfoShow(item){
+
+            }
+
             self.page = isEPAM ? from : parseInt(json['page']['number']); //current page number (taken from json)
             self.totalPages = isEPAM ? Math.floor(parseInt(json['hits']['total']) /20 )  : parseInt(json['page']['totalPages']); // total page number (taken from json)
             console.log('self.paging', self.page,' of ',self.totalPages);
@@ -146,18 +150,31 @@
                         leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
 
                     if (itemInfo.flickrImages) { // apend img if it exist
-                        var cropImg = $('<div class="col-xs-4"></div>'); // wrapper img
+                        var greenDot = $('<div class="green-dot"></div>'); // wrapper img
+                        leftColumn.append(greenDot);
 
                         for(var i=0; i<itemInfo.length, i<3; i++){
-                         columnRight.append($('<div class="crop-image col-xs-4"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
+                            if(!itemInfo.flickrImages[i]) continue;
+                         columnRight.append($('<div class="crop-image col-xs-4"><a href="'+itemUrl+'"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></a></div>'));
                         }
                     }
                     /*test id 2900502CFF8309E2*/
                     if (itemInfo.universePage && itemInfo.flickrImages) { // apend img if it exist
-                        var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description+ '</h1>');
-                        columnRight.append(description).append($('<div class="col-xs-12"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"></div>'));
+                        var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description + '</h1>');
+                        columnRight.append(description).append($('<div class="col-xs-12"><a href="'+itemUrl+'"><img src="'+itemInfo.universePage.images[0]+'" class="img-responsive"></a></div>'));
 
                     }
+
+                    // apend googleData.results if it exist
+                    if (itemInfo.googleData) {
+                        columnRight.append( $(' <h3>googleData block</h3>') );
+
+                        for(var i=0; i<itemInfo.googleData.results.length, i<3; i++){
+                            //console.log('itemInfo.googleData.results', itemInfo.googleData.results[i].title);
+                            columnRight.append( $('<div class="crop-image col-xs-12"> <h4>'+ itemInfo.googleData.results[i].title + '</h4> </div>') );
+                        }
+                    }
+                    columnRight.append('<hr/>');
 
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
@@ -180,6 +197,15 @@
                 self.nextPage.on('click', function(e){ // next button click listener
                     e.preventDefault();
                     self.goToNextPage();
+                });
+                $('.list-group-item').on('click', function(e){ // list-group-item listener
+                    e.preventDefault();
+                    var responseDetailContainer = $('#response-detail');
+                    responseDetailContainer.fadeOut(200, function() {
+                        $(this).empty().show();
+                        responseDetailContainer.fadeIn("slow");
+                        responseDetailContainer.append( $('<p>current item details here</div>'));
+                    });
                 });
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
