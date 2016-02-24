@@ -167,6 +167,8 @@
                         itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, // item URL
                         itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
 
+                    listItem.data('id', (isEPAM ? array[item]['_source']['id'] : array[item].id));
+
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
@@ -218,6 +220,7 @@
                 });
                 $('.js_left_list').on('click', function(e){ // list-group-item listener
                     e.preventDefault();
+                    console.log($(this).data('id'));
                     console.log('current elem: ', event.target.nodeName );
                     var self = this;
                     console.log('this.attr("id"): ', self.id );
