@@ -75,12 +75,13 @@ public class AdditionalInfoProcessor {
         ArrayList<Object> venues = (ArrayList<Object>) ((Map) event.get("_embedded")).get("venue");
 
         AdditionInfo info = new AdditionInfo();
-
+/*
         if (original.getGoogleData() == null || original.getGoogleData().isEmpty()) {
             info(this, "call Google");
             GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
             info.setGoogleData(google);
         }
+        */
         if (original.flickrImages == null || original.flickrImages.isEmpty()) {
             info(this, "call Flickr");
             Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
