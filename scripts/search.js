@@ -110,8 +110,33 @@
         var Column = function(json, pathToArray, url, isEPAM, from){
             var self = this;
 
-            function itemInfoShow(item){
+            function itemInfoShow(itemInfo, leftColumn, columnRight, itemUrl){
+                /*test id 2900502CFF8309E2*/
+                if (itemInfo.flickrImages) { // apend img if it exist
+                    var greenDot = $('<div class="green-dot"></div>'); // wrapper img
+                    leftColumn.append(greenDot);
 
+                    for(var i=0; i<itemInfo.length, i<3; i++){
+                        if(!itemInfo.flickrImages[i]) continue;
+                        columnRight.append($('<div class="crop-image col-xs-4"><a href="'+itemUrl+'" target="_blank"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></a></div>'));
+                    }
+                }
+
+                if (itemInfo.universePage && itemInfo.flickrImages) { // apend img if it exist
+                    var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description + '</h1>');
+                    columnRight.append(description).append($('<div class="col-xs-12"><a href="'+itemUrl+'"><img src="'+itemInfo.universePage.images[0]+'" class="img-responsive"></a></div>'));
+
+                }
+
+                // apend googleData.results if it exist
+                if (itemInfo.googleData) {
+                    columnRight.append( $(' <h3>googleData block</h3>') );
+
+                    for(var i=0; i<itemInfo.googleData.results.length, i<3; i++){
+                        //console.log('itemInfo.googleData.results', itemInfo.googleData.results[i].title);
+                        columnRight.append( $('<div class="crop-image col-xs-12"> <h4>'+ itemInfo.googleData.results[i].title + '</h4> </div>') );
+                    }
+                }
             }
 
             self.page = isEPAM ? from : parseInt(json['page']['number']); //current page number (taken from json)
@@ -134,46 +159,23 @@
                 column.append(title); // append header to column wrapper
 
                 for (var item in array){ // iterate through each item in array
-                    var listItem = $('<a class="list-group-item row"></a>'), // item wrapper
+                    var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
                         leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
                         name = $('<div>' + '<b>name: </b>' + (isEPAM ? array[item]['_source']['name'] : array[item].name) + '</div>'), // item name
-                        id = $('<div>' + '<b>id : </b>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
-
+                        id = $('<div id="id">' + '<b>id : </b>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
 
                         itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, // item URL
                         itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
-                    /*console.log('itemInfo',itemInfo);
-                    console.log('itemInfo',(itemInfo) ? itemInfo.flickrImages : 'none');*/
+
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
                         leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
 
-                    if (itemInfo.flickrImages) { // apend img if it exist
-                        var greenDot = $('<div class="green-dot"></div>'); // wrapper img
-                        leftColumn.append(greenDot);
+                    if(itemInfo) {
+                        itemInfoShow(itemInfo, leftColumn , columnRight, itemUrl);
+                    };
 
-                        for(var i=0; i<itemInfo.length, i<3; i++){
-                            if(!itemInfo.flickrImages[i]) continue;
-                         columnRight.append($('<div class="crop-image col-xs-4"><a href="'+itemUrl+'"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></a></div>'));
-                        }
-                    }
-                    /*test id 2900502CFF8309E2*/
-                    if (itemInfo.universePage && itemInfo.flickrImages) { // apend img if it exist
-                        var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description + '</h1>');
-                        columnRight.append(description).append($('<div class="col-xs-12"><a href="'+itemUrl+'"><img src="'+itemInfo.universePage.images[0]+'" class="img-responsive"></a></div>'));
-
-                    }
-
-                    // apend googleData.results if it exist
-                    if (itemInfo.googleData) {
-                        columnRight.append( $(' <h3>googleData block</h3>') );
-
-                        for(var i=0; i<itemInfo.googleData.results.length, i<3; i++){
-                            //console.log('itemInfo.googleData.results', itemInfo.googleData.results[i].title);
-                            columnRight.append( $('<div class="crop-image col-xs-12"> <h4>'+ itemInfo.googleData.results[i].title + '</h4> </div>') );
-                        }
-                    }
                     columnRight.append('<hr/>');
 
                     listItem.append(leftColumn); // append left column to item wrapper
@@ -189,6 +191,22 @@
                 responseDetailContainer.append(titleRight).append(columnRight);
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
+            self.renderCardDetail = function(responseDetailContainer){
+                var array = Object.byString(json, pathToArray), // get array of items
+                    /*details column*/
+                    cardSingleRight = $('<div class="list-group-item row"></div>'),
+                    titleCard = $('<a class="list-group-item active">Single card details</a>'); // column header
+
+                responseDetailContainer.append(titleCard);
+                for (var item in array){
+                    var itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+                    console.log('item',item);
+                    //cardSingleRight
+                    if(itemInfo) {
+                        itemInfoShow(itemInfo, leftColumn , columnRight, itemUrl);
+                    };
+                };
+            };
             self.setListeners = function(){
                 self.previousPage.on('click', function(e){ // previous button click listener
                     e.preventDefault();
@@ -198,13 +216,20 @@
                     e.preventDefault();
                     self.goToNextPage();
                 });
-                $('.list-group-item').on('click', function(e){ // list-group-item listener
+                $('.js_left_list').on('click', function(e){ // list-group-item listener
                     e.preventDefault();
+                    console.log('current elem: ', event.target.nodeName );
+                    var self = this;
+                    console.log('this.attr("id"): ', self.id );
                     var responseDetailContainer = $('#response-detail');
                     responseDetailContainer.fadeOut(200, function() {
                         $(this).empty().show();
                         responseDetailContainer.fadeIn("slow");
+
+                        responseDetailContainer.append( $(self).attr('id') );
+
                         responseDetailContainer.append( $('<p>current item details here</div>'));
+                        //self.renderCardDetail(responseDetailContainer);
                     });
                 });
             };
