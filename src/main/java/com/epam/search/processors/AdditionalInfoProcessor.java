@@ -21,48 +21,69 @@ public class AdditionalInfoProcessor {
     public Object process(Map<String, Object> event) {
         String eventName = (String) event.get("name");
         String eventUrl = (String) event.get("eventUrl");
-        AdditionInfo additionalInfo = getAdditionalInfo(eventName, eventUrl);
-        AdditionInfo merged = merge(event, additionalInfo);
+
+        AdditionInfo original = null;
+        if (event.containsKey("info")) {
+            info(this, "Event has Info");
+            original = JsonHelper.getMapper().convertValue(event.get("info"), AdditionInfo.class);
+        } else {
+            info(this, "No info");
+            original = new AdditionInfo();
+        }
+
+        AdditionInfo additionalInfo = getAdditionalInfo(eventName, eventUrl, original);
+        AdditionInfo merged = merge(original, additionalInfo);
         info(this, "MERGE RESULT : " + merged);
         event.put("info", merged);
         return event;
     }
 
-    private AdditionInfo merge(Map<String, Object> event, AdditionInfo additionalInfo) {
-        if (!event.containsKey("info"))
-            return additionalInfo;
-        AdditionInfo merged = JsonHelper.getMapper().convertValue(event.get("info"), AdditionInfo.class);
-        if (!additionalInfo.getGoogleData().isEmpty()) {
+    private AdditionInfo merge(AdditionInfo original, AdditionInfo additionalInfo) {
+
+        AdditionInfo merged = original;
+        if (additionalInfo.getGoogleData() != null && !additionalInfo.getGoogleData().isEmpty()) {
+            info(this, "got Google");
             merged.setGoogleData(additionalInfo.googleData);
         }
         if (additionalInfo.flickrImages != null && !additionalInfo.flickrImages.isEmpty()) {
+            info(this, "got Flickr");
             merged.setFlickrImages(additionalInfo.flickrImages);
         }
         if (additionalInfo.getUniversePage() != null) {
+            info(this, "got TM");
             merged.setUniversePage(additionalInfo.getUniversePage());
         }
         return merged;
     }
 
-    private AdditionInfo getAdditionalInfo(String eventName, String eventUrl) {
+    private AdditionInfo getAdditionalInfo(String eventName, String eventUrl, AdditionInfo original) {
         AdditionInfo info = new AdditionInfo();
 
-        //GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
-        //info.setGoogleData(google);
-
-        Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
-        if (!flickrImages.isEmpty()) {
-            info.setFlickrImages(flickrImages);
+        if (original.getGoogleData() == null || original.getGoogleData().isEmpty()) {
+            info(this, "call Google");
+            GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
+            info.setGoogleData(google);
+        }
+        if (original.flickrImages == null || original.flickrImages.isEmpty()) {
+            info(this, "call Flickr");
+            Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
+            if (!flickrImages.isEmpty()) {
+                info.setFlickrImages(flickrImages);
+            }
         }
 
-        Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
-        result.map(pr -> {
-            UniversePage page = new UniversePage();
-            page.addImage(pr.getImage());
-            page.setDescription(pr.getDescription());
-            info.setUniversePage(page);
-            return "";
-        });
+
+        if (original.getUniversePage() == null) {
+            info(this, "call TM");
+            Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
+            result.map(pr -> {
+                UniversePage page = new UniversePage();
+                page.addImage(pr.getImage());
+                page.setDescription(pr.getDescription());
+                info.setUniversePage(page);
+                return "";
+            });
+        }
 
         return info;
     }
