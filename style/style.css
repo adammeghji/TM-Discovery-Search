@@ -78,3 +78,48 @@
 .google_map {
     height: 262px;
 }
+
+/* Flickr Card */
+.flickr_card {
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.flickr_card__item {
+    float: left;
+    width: 20%;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.flickr_card .flickr_card__item:first-child {
+    width: 40%;
+}
+
+.flickr_card__item img{
+    display: block;
+    width: 100%;
+    opacity: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
