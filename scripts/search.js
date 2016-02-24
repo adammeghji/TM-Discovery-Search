@@ -139,6 +139,28 @@
                 }
             }
 
+            function getEventsFlickrImagesCard(data){
+                var $card = $("<div class='flickr_card'></div>"),
+                    imageList = [];
+
+                for(var item in data){
+                    var ref, ref1;
+                    if (data[item] != null ? (ref = data[item]._source) != null ? (ref1 = ref.info) != null ? ref1.flickrImages : void 0 : void 0 : void 0) {
+                        imageList = _.concat(imageList, ref1.flickrImages);
+                    }
+                }
+
+                imageList = _.uniq(imageList);
+                imageList = _.slice(imageList, [start=0], [end=17]);
+
+                for(var _i in imageList){
+                    var $cardItem = $("<div class='flickr_card__item'><img alt='' src='./assets/empty_1x1.png'></div>");
+                    $cardItem.css({backgroundImage: 'url(' + imageList[_i] +')'});
+                    $card.append($cardItem);
+                }
+                return $card;
+            }
+
             self.page = isEPAM ? from : parseInt(json['page']['number']); //current page number (taken from json)
             self.totalPages = isEPAM ? Math.floor(parseInt(json['hits']['total']) /20 )  : parseInt(json['page']['totalPages']); // total page number (taken from json)
             console.log('self.paging', self.page,' of ',self.totalPages);
@@ -159,6 +181,7 @@
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
 
+                columnRight.append(getEventsFlickrImagesCard(array));  // append Google maps
                 columnRight.append($googleMap);  // append Google maps
 
                 for (var item in array){ // iterate through each item in array
@@ -276,7 +299,7 @@
                     center = {lat: 39.3648338, lng: -101.4381589},
                     map = new google.maps.Map(document.getElementById('js_google_map'), {
                         center: center,
-                        zoom: 4
+                        zoom: 3
                     });
 
                 for (var item in array){
