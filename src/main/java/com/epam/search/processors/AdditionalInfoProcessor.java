@@ -56,7 +56,10 @@ public class AdditionalInfoProcessor {
             merged.setWikiVenues(additionalInfo.getWikiVenues());
         }
 
-
+        if (additionalInfo.attractions != null && !additionalInfo.attractions.isEmpty()) {
+            info(this, "got WIKI Venues processorr");
+            merged.setAttractions(additionalInfo.getAttractions());
+        }
 
         if (additionalInfo.getUniversePage() != null) {
             info(this, "got Content processor");
