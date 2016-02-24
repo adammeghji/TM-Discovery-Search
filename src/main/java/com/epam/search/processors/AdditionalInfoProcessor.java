@@ -15,6 +15,7 @@ public class AdditionalInfoProcessor {
     private ContentProcessor contentProcessor = new ContentProcessor();
     private SearchProcessor flickrProcessor = new FlickrProcessor();
     private TMProcessor tmProcessor = new TMProcessor();
+    private WikiProcessor wikiProcessor = new WikiProcessor();
 
     public Object process(Map<String, Object> event) {
         AdditionInfo original = null;
@@ -54,8 +55,8 @@ public class AdditionalInfoProcessor {
     private AdditionInfo getAdditionalInfo(Map<String, Object> event, AdditionInfo original) {
         String eventName = (String) event.get("name");
         String eventUrl = (String) event.get("eventUrl");
-        ArrayList<Object> attractions = (ArrayList<Object>) ((Map)event.get("_embedded")).get("attractions");
-        ArrayList<Object> venues = (ArrayList<Object>) ((Map)event.get("_embedded")).get("venue");
+        ArrayList<Object> attractions = (ArrayList<Object>) ((Map) event.get("_embedded")).get("attractions");
+        ArrayList<Object> venues = (ArrayList<Object>) ((Map) event.get("_embedded")).get("venue");
 
         AdditionInfo info = new AdditionInfo();
 
@@ -71,14 +72,20 @@ public class AdditionalInfoProcessor {
                 info.setFlickrImages(flickrImages);
             }
         }
-        if (original.attractions == null || original.attractions.isEmpty()) {
-            info(this, "call TM processor");
-            Set<TMProcessor.ArtistInfo> newAttractions = tmProcessor.fetchAttractionInfo(attractions);
-            if (!newAttractions.isEmpty()) {
-                info.setAttractions(newAttractions);
+        if (original.wikiAttractions == null || original.wikiAttractions.isEmpty()) {
+            info(this, "call WIKI Attraction processor");
+            Map<String, String> newWikiAttractions = wikiProcessor.fetchAttractionInfo(attractions);
+            if (!newWikiAttractions.isEmpty()) {
+                info.setWikiAttractions(newWikiAttractions);
             }
         }
-
+        if (original.wikiVenues == null || original.wikiVenues.isEmpty()) {
+            info(this, "call WIKI Venues processor");
+            Map<String, String> newWikiVenues = wikiProcessor.fetchVenuesInfo(venues);
+            if (!newWikiVenues.isEmpty()) {
+                info.setWikiVenues(newWikiVenues);
+            }
+        }
 
         if (original.getUniversePage() == null) {
             info(this, "call Content processor");
@@ -101,6 +108,8 @@ public class AdditionalInfoProcessor {
         private UniversePage universePage;
         private Set<String> flickrImages;
         private Set<TMProcessor.ArtistInfo> attractions;
+        private Map<String, String> wikiAttractions;
+        private Map<String, String> wikiVenues;
 
         public AdditionInfo() {
         }
@@ -140,6 +149,22 @@ public class AdditionalInfoProcessor {
 
         public void setAttractions(Set<TMProcessor.ArtistInfo> attractions) {
             this.attractions = attractions;
+        }
+
+        public Map<String, String> getWikiAttractions() {
+            return wikiAttractions;
+        }
+
+        public void setWikiAttractions(Map<String, String> wikiAttractions) {
+            this.wikiAttractions = wikiAttractions;
+        }
+
+        public Map<String, String> getWikiVenues() {
+            return wikiVenues;
+        }
+
+        public void setWikiVenues(Map<String, String> wikiVenues) {
+            this.wikiVenues = wikiVenues;
         }
 
         @Override
