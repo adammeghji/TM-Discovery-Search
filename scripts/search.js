@@ -244,7 +244,7 @@
 
                     //render cardSingleRight
                     if(idList === idDetail) {
-                        console.log('fount id in list', idList , idDetail);
+                        console.log('fount id in list', idList , idDetail , itemAttractions);
                         if (itemInfo.flickrImages) { // apend img if it exist
                             responseDetailContainer.append($('<div class="col-xs-6 double-height"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"><span>flick img 01</span></div>'));
 
@@ -253,9 +253,9 @@
                                 responseDetailContainer.append($('<div class="crop-image-flick col-xs-6"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
                             }
                         }
-                        console.log('itemAttractions' , itemAttractions[0].image.url);
+                        //console.log('itemAttractions' , itemAttractions[0].image.url);
 
-                        if (itemAttractions[0].image.url) { // apend img if it exist
+                        if (itemAttractions.url && itemAttractions[0].image.url) { // apend img if it exist
                             console.log('itemAttractions' ,itemAttractions[0].image.url);
                             eventPicHost += itemAttractions[0].image.url;
                             responseDetailContainer.append($('<div class="double-height col-xs-12"><img src=" '+eventPicHost+'" class="img-responsive"><span>attraction img</span></div>' ));
