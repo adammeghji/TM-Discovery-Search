@@ -102,7 +102,7 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     }
 
     private void processEvents(List<SearchService.SingleSearchResult> events) throws Exception {
-        events.stream().forEach(singleSearchResult -> {
+        events.parallelStream().forEach(singleSearchResult -> {
             Object event = processEvent(singleSearchResult.getSource());
             insertSingleEvent(JsonHelper.toJson(event, false), singleSearchResult.getId());
             count++;

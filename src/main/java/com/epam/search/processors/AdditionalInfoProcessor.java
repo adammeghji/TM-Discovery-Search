@@ -2,10 +2,7 @@ package com.epam.search.processors;
 
 import com.epam.search.common.JsonHelper;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.epam.search.common.LoggingUtil.info;
 import static org.apache.http.util.TextUtils.isBlank;
@@ -17,11 +14,9 @@ public class AdditionalInfoProcessor {
     private GoogleProcessor googleProcessor = new GoogleProcessor();
     private ContentProcessor contentProcessor = new ContentProcessor();
     private SearchProcessor flickrProcessor = new FlickrProcessor();
+    private TMProcessor tmProcessor = new TMProcessor();
 
     public Object process(Map<String, Object> event) {
-        String eventName = (String) event.get("name");
-        String eventUrl = (String) event.get("eventUrl");
-
         AdditionInfo original = null;
         if (event.containsKey("info")) {
             info(this, "Event has Info");
@@ -31,7 +26,7 @@ public class AdditionalInfoProcessor {
             original = new AdditionInfo();
         }
 
-        AdditionInfo additionalInfo = getAdditionalInfo(eventName, eventUrl, original);
+        AdditionInfo additionalInfo = getAdditionalInfo(event, original);
         AdditionInfo merged = merge(original, additionalInfo);
         info(this, "MERGE RESULT : " + merged);
         event.put("info", merged);
@@ -56,7 +51,12 @@ public class AdditionalInfoProcessor {
         return merged;
     }
 
-    private AdditionInfo getAdditionalInfo(String eventName, String eventUrl, AdditionInfo original) {
+    private AdditionInfo getAdditionalInfo(Map<String, Object> event, AdditionInfo original) {
+        String eventName = (String) event.get("name");
+        String eventUrl = (String) event.get("eventUrl");
+        ArrayList<Object> attractions = (ArrayList<Object>) ((Map)event.get("_embedded")).get("attractions");
+        ArrayList<Object> venues = (ArrayList<Object>) ((Map)event.get("_embedded")).get("venue");
+
         AdditionInfo info = new AdditionInfo();
 
         if (original.getGoogleData() == null || original.getGoogleData().isEmpty()) {
@@ -71,10 +71,17 @@ public class AdditionalInfoProcessor {
                 info.setFlickrImages(flickrImages);
             }
         }
+        if (original.attractions == null || original.attractions.isEmpty()) {
+            info(this, "call TM processor");
+            Set<TMProcessor.ArtistInfo> newAttractions = tmProcessor.fetchAttractionInfo(attractions);
+            if (!newAttractions.isEmpty()) {
+                info.setAttractions(newAttractions);
+            }
+        }
 
 
         if (original.getUniversePage() == null) {
-            info(this, "call TM");
+            info(this, "call Content processor");
             Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
             result.map(pr -> {
                 UniversePage page = new UniversePage();
@@ -93,6 +100,7 @@ public class AdditionalInfoProcessor {
         private GoogleProcessor.GoogleResults.GoogleData googleData;
         private UniversePage universePage;
         private Set<String> flickrImages;
+        private Set<TMProcessor.ArtistInfo> attractions;
 
         public AdditionInfo() {
         }
@@ -124,6 +132,14 @@ public class AdditionalInfoProcessor {
 
         public void setFlickrImages(Set<String> flickrImages) {
             this.flickrImages = flickrImages;
+        }
+
+        public Set<TMProcessor.ArtistInfo> getAttractions() {
+            return attractions;
+        }
+
+        public void setAttractions(Set<TMProcessor.ArtistInfo> attractions) {
+            this.attractions = attractions;
         }
 
         @Override

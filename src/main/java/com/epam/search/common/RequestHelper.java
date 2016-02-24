@@ -9,9 +9,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.stream.Collectors;
 
 import static com.epam.search.common.LoggingUtil.error;
@@ -44,6 +42,18 @@ public class RequestHelper {
         } catch (Exception e) {
             error(RequestHelper.class, "Content unavailable for : " + inputStream);
             return "";
+        }
+    }
+
+    public static void saveToFile(String fileName, String data) {
+        try {
+            Path targetPath = new File(fileName).toPath();
+            if (!Files.exists(targetPath.getParent())) {
+                Files.createDirectories(targetPath.getParent());
+            }
+            Files.write(targetPath, data.getBytes(), StandardOpenOption.CREATE);
+        } catch (Exception e) {
+            error(RequestHelper.class, e);
         }
     }
 
