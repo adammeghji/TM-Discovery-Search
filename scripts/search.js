@@ -302,7 +302,7 @@
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
                 if (isEPAM){
-                    runEPAMRequest(from - 1);
+                    runEPAMRequest(from - 20);
                     return;
                 }
                 sendRequest(self.url + '&page=' + (self.page - 1), 'GET', null, function(response){
@@ -313,7 +313,7 @@
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
 
                 if (isEPAM){
-                    runEPAMRequest(from + 1);
+                    runEPAMRequest(from + 20);
                     return;
                 }
                 //console.log('self.goToNextPage pressed','isEPAM:',isEPAM);
