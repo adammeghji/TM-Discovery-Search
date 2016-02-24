@@ -141,7 +141,9 @@
 
             function getEventsFlickrImagesCard(data){
                 var $card = $("<div class='flickr_card'></div>"),
-                    imageList = [];
+                    imageList = [],
+                    limit = 17,
+                    cardCount = 7;
 
                 for(var item in data){
                     var ref, ref1;
@@ -151,12 +153,19 @@
                 }
 
                 imageList = _.uniq(imageList);
-                imageList = _.slice(imageList, [start=0], [end=17]);
+                imageList = _.slice(imageList, [start = 0], [end = limit]);
 
-                for(var _i in imageList){
-                    var $cardItem = $("<div class='flickr_card__item'><img alt='' src='./assets/empty_1x1.png'></div>");
-                    $cardItem.css({backgroundImage: 'url(' + imageList[_i] +')'});
-                    $card.append($cardItem);
+                if(imageList.length){
+                    if(imageList.length > cardCount) cardCount = 12;
+                    if(imageList.length > cardCount) cardCount = 17;
+                    for (var _i = 0; _i < cardCount; _i++){
+                        var $cardItem = $("<div class='flickr_card__item'><img alt='' src='./assets/empty_1x1.png'></div>");
+                        if(imageList[_i])  $cardItem.css({backgroundImage: 'url(' + imageList[_i] +')'});
+                        $card.append($cardItem);
+                    }
+                    $card.addClass('flickr_card-count_' + cardCount);
+                }else{
+                    return false;
                 }
                 return $card;
             }
@@ -181,7 +190,8 @@
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
 
-                columnRight.append(getEventsFlickrImagesCard(array));  // append Google maps
+                var flickrImagesCard = getEventsFlickrImagesCard(array);
+                if(flickrImagesCard) columnRight.append(flickrImagesCard);
                 columnRight.append($googleMap);  // append Google maps
 
                 for (var item in array){ // iterate through each item in array

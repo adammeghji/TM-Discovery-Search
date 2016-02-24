@@ -91,11 +91,33 @@
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    background-color: #c0e0bb;
 }
+
 
 .flickr_card .flickr_card__item:first-child {
     width: 40%;
 }
+
+/* background colors */
+.flickr_card .flickr_card__item:nth-child(3n+2) {
+    background-color: yellow;
+}
+
+.flickr_card .flickr_card__item:nth-child(5),
+.flickr_card .flickr_card__item:nth-child(3n+3){
+    background-color: #f7584c;
+}
+
+.flickr_card .flickr_card__item:nth-child(6),
+.flickr_card .flickr_card__item:nth-child(3n+4) {
+    background-color: #b3d1ff;
+}
+
+.flickr_card .flickr_card__item:nth-child(7) {
+    background-color: #f9bc2b;
+}
+
 
 .flickr_card__item img{
     display: block;
