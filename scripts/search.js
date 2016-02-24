@@ -153,10 +153,13 @@
                     /*details column*/
                     columnRight = $('<div class="list-group-item row"></div>'),
                     titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
-                    responseDetailContainer = $('#response-detail'); // column wrappoer in DOM
+                    responseDetailContainer = $('#response-detail'), // column wrappoer in DOM
+                    $googleMap = '<div id="js_google_map" class="google_map"></div>';
 
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
+
+                columnRight.append($googleMap);  // append Google maps
 
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
@@ -193,7 +196,9 @@
                 responseDetailContainer.append(titleRight).append(columnRight);
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
-            self.renderCardDetail = function(responseDetailContainer){
+
+
+            self.renderCardDetail = function(responseDetailContainer , idDetail){
                 var array = Object.byString(json, pathToArray), // get array of items
                     /*details column*/
                     cardSingleRight = $('<div class="list-group-item row"></div>'),
@@ -201,11 +206,30 @@
 
                 responseDetailContainer.append(titleCard);
                 for (var item in array){
-                    var itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
-                    console.log('item',item);
-                    //cardSingleRight
-                    if(itemInfo) {
-                        itemInfoShow(itemInfo, leftColumn , columnRight, itemUrl);
+                    var idList = isEPAM ? array[item]['_source']['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
+                        columnRight = $('<div class="list-group-item row"></div>'), //override
+                        itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, //override item URL
+                        itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+
+                    //render cardSingleRight
+                    if(idList === idDetail) {
+                        console.log('fount id in list', idList , idDetail);
+
+                        if (itemInfo.universePage && itemInfo.flickrImages) { // apend img if it exist
+                            var description = $('<h1 class="col-xs-12">'+ itemInfo.universePage.description + '</h1>');
+                            columnRight.append(description).append($('<div class="col-xs-12"><a href="'+itemUrl+'"><img src="'+itemInfo.universePage.images[0]+'" class="img-responsive"></a></div>'));
+
+                        }
+
+                        // apend googleData.results if it exist
+                        if (itemInfo.googleData) {
+                            columnRight.append( $(' <h3>googleData block</h3>') );
+
+                            for(var i=0; i<itemInfo.googleData.results.length, i<3; i++){
+                                //console.log('itemInfo.googleData.results', itemInfo.googleData.results[i].title);
+                                columnRight.append( $('<div class="crop-image col-xs-12"> <h4>'+ itemInfo.googleData.results[i].title + '</h4> </div>') );
+                            }
+                        }
                     };
                 };
             };
@@ -220,11 +244,12 @@
                 });
                 $('.js_left_list').on('click', function(e){ // list-group-item listener
                     e.preventDefault();
-                    console.log($(this).data('id'));
+
                     console.log('current elem: ', event.target.nodeName );
-                    var self = this;
-                    console.log('this.attr("id"): ', self.id );
-                    var responseDetailContainer = $('#response-detail');
+                    //var self = this;
+                    var responseDetailContainer = $('#response-detail'),
+                        idDetail = $(this).data('id');
+
                     responseDetailContainer.fadeOut(200, function() {
                         $(this).empty().show();
                         responseDetailContainer.fadeIn("slow");
@@ -232,7 +257,7 @@
                         responseDetailContainer.append( $(self).attr('id') );
 
                         responseDetailContainer.append( $('<p>current item details here</div>'));
-                        //self.renderCardDetail(responseDetailContainer);
+                        self.renderCardDetail(responseDetailContainer, idDetail);
                     });
                 });
             };
@@ -265,7 +290,34 @@
                     new Column(response, pathToArray, self.url, isEPAM);
                 });
             };
+
+            self.initGroupEventsMap = function(){
+                var array = Object.byString(json, pathToArray),
+                    center = {lat: 39.3648338, lng: -101.4381589},
+                    map = new google.maps.Map(document.getElementById('js_google_map'), {
+                        center: center,
+                        zoom: 4
+                    });
+
+                for (var item in array){
+                    var location = array[item]['_source'].location;
+                    //console.log(location);
+                    if(location){
+                        new google.maps.Marker({
+                            position: {
+                                lat: location.lat,
+                                lng: location.lon
+                            },
+                            map: map
+                        });
+                    }
+                }
+
+                return map;
+            };
+
             self.render();
+            self.initGroupEventsMap();
             self.setListeners();
         };
 
