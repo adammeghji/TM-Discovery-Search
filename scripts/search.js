@@ -187,12 +187,22 @@
                     responseDetailContainer = $('#response-detail'), // column wrappoer in DOM
                     $googleMap = '<div id="js_google_map" class="google_map"></div>';
 
+                    //if(isEPAM){
+                    //    responseContainer.removeClass('col-xs-12').addClass('col-xs-6');
+                    //    responseDetailContainer.show();
+                    //}else{
+                    //    responseContainer.removeClass('col-xs-6').addClass('col-xs-12');
+                    //    responseDetailContainer.hide();
+                    //}
+
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
 
-                var flickrImagesCard = getEventsFlickrImagesCard(array);
-                if(flickrImagesCard) columnRight.append(flickrImagesCard);
-                columnRight.append($googleMap);  // append Google maps
+                if(isEPAM){
+                    var flickrImagesCard = getEventsFlickrImagesCard(array);
+                    if(flickrImagesCard) columnRight.append(flickrImagesCard);
+                    columnRight.append($googleMap);  // append Google maps
+                }
 
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
@@ -356,7 +366,7 @@
             };
 
             self.render();
-            self.initGroupEventsMap();
+            if(isEPAM) self.initGroupEventsMap();
             self.setListeners();
         };
 
