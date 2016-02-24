@@ -71,7 +71,7 @@
 
             if (splitted.length === 1){
                 EPAM_data_match = {
-                    "_all": {
+                    "name": {
                         "query": splitted[0],
                         "operator": "or",
                         "fuzziness": 2,
