@@ -44,28 +44,24 @@
 
         // get approach: 'TM' or 'EPAM' or 'FUZZY'
         function getApproach(){
-
             var selected = $("input[type='radio'][name='approach']:checked");
-            console.log(selected);
-            var responseContainer = $('#response'),
-                responseDetailContainer = $('#response-detail');
-            if (selected.length > 0) {
-                responseContainer.removeClass("col-xs-6").addClass("col-xs-12"); //show right column
-                responseDetailContainer.hide(); //hide right column
-                return selected.val();
-            }
-            else{
-                responseContainer.addClass("col-xs-6").removeClass("col-xs-12"); //show right column
-                responseDetailContainer.show(); //show right column
-                return false;
-            }
-        };
+            if (selected.length > 0) return selected.val();
+            else return false;
+        }
 
         $("input[type='radio'][name='approach']").on('change', function(){
-            getApproach();
+            var responseContainer = $('#response'),
+                responseDetailContainer = $('#response-detail');
+            if (getApproach() === "TM") {
+                responseContainer.removeClass("col-xs-6").addClass("col-xs-12"); //show right column
+                responseDetailContainer.hide(); //hide right column
+                runTMRequest(); // run TM request
+            }else{
+                responseContainer.addClass("col-xs-6").removeClass("col-xs-12"); //show right column
+                responseDetailContainer.show(); //show right column
+                runEPAMRequest(); // run EPAM request
+            }
         });
-
-
 
         // runs TM request
         var runTMRequest = function(){
