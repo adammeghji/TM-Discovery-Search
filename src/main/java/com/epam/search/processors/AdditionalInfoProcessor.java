@@ -4,6 +4,7 @@ import com.epam.search.common.JsonHelper;
 import com.epam.search.common.ProcessorConfig;
 
 import java.util.*;
+import java.lang.*;
 
 import static com.epam.search.common.LoggingUtil.error;
 import static com.epam.search.common.LoggingUtil.info;
@@ -172,6 +173,16 @@ public class AdditionalInfoProcessor {
                 Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
                 if (!flickrImages.isEmpty()) {
                     info.setFlickrImages(flickrImages);
+                } else {
+                    flickrImages = flickrProcessor.fetchImages(eventName.split(" ")[0]);
+                    if (!flickrImages.isEmpty()) {
+                        info.setFlickrImages(flickrImages);
+                    } else {
+                        flickrImages = flickrProcessor.fetchImages(eventName.split(" ")[1]);
+                        if (!flickrImages.isEmpty()) {
+                            info.setFlickrImages(flickrImages);
+                        }
+                    }
                 }
             } catch (Exception e) {
             }

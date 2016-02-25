@@ -12,6 +12,6 @@ public class DataGrabber {
         GrabberService service = new GrabberServiceImpl();
       //  service.grab(0,100);
        // service.grab(0);
-        service.grab("goss");
+        service.grab("Beyoncé");
     }
 }
