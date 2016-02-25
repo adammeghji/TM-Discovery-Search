@@ -102,12 +102,117 @@
             };
 
             sendRequest(url, 'POST', EPAM_data, function(json){
-                new Column(json, 'hits.hits', url, true, from ? from : 0);
+                //new Column(json, 'hits.hits', url, true, from ? from : 0);
+                new ColumnEpam(json, 'hits.hits', url, true, from ? from : 0);
             });
         };
 
         // column constructor for TM
         var Column = function(json, pathToArray, url, isEPAM, from){
+            var self = this;
+            self.page = parseInt(json['page']['number']); //current page number (taken from json)
+            self.totalPages = parseInt(json['page']['totalPages']); // total page number (taken from json)
+            self.url = url; // base url (with API key and keyword) without page parameter
+            self.render = function(){
+                var column = $('<div class="list-group"></div>'), // column wrapper
+                    title = $('<a class="list-group-item active">Events</a>'), // column header
+                    array = Object.byString(json, pathToArray), // get array of items
+                    responseContainer = $('#response'); // column wrappoer in DOM
+
+                $('#response-detail').hide();
+                responseContainer.removeClass("col-xs-6").addClass("col-xs-12");
+
+                responseContainer.empty(); // remove any previous columns
+                column.append(title); // append header to column wrapper
+
+                for (var item in array){ // iterate through each item in array
+                    var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
+                        leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
+                        name = $('<div>' + '<b>name: </b>' + array[item].name + '</div>'), // item name
+                        id = $('<div id="id">' + '<b>id : </b>' + array[item].id + '</div>'), // item id
+                        itemUrl =  array[item].eventUrl; // item URL
+
+                    leftColumn.append(name).append(id); // append name and id to wrapper left column
+                    if (itemUrl) // apend link to TM if there is any to wrapper left column
+                        leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
+                    listItem.append(leftColumn); // append left column to item wrapper
+                    column.append(listItem); // add whole item to column
+                }
+                self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
+                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
+                self.paging = $('<p id="paging">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</p>'); // display current page of total
+                responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
+
+                self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
+            };
+            self.setListeners = function(){
+                self.previousPage.on('click', function(e){ // previous button click listener
+                    e.preventDefault();
+                    self.goToPreviousPage();
+                });
+                self.nextPage.on('click', function(e){ // next button click listener
+                    e.preventDefault();
+                    self.goToNextPage();
+                });
+            };
+            self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
+                sendRequest(self.url + '&page=' + (self.page - 1), 'GET', null, function(response){
+                    new Column(response, pathToArray, self.url, isEPAM);
+                });
+
+            };
+            self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
+                /**
+                 * @url -string
+                 * @method - string
+                 * data - object
+                 * callback - function
+                 */
+                sendRequest(self.url + '&page=' + (self.page + 1), 'GET', null ,function(response){
+                    //console.log('***build new column',response);
+                    new Column(response, pathToArray, self.url, isEPAM);
+                });
+            };
+            self.render();
+            self.setListeners();
+        };
+
+        // returns keyword
+        var getKeywordValue = function(){
+            return $('#text-to-search').val();
+        };
+
+        //universal ajax request sender
+        var sendRequest = function(url, method, data, callback){
+            spinner.show();
+            //console.info('dataSend:' , data);
+
+            $.ajax({
+                type: method,
+                url: url,
+                async: true,
+                data: data ? JSON.stringify(data) : "",
+                success: function(response, textStatus, jqXHR) {
+                    spinner.hide();
+                    console.info('response ' , response);
+                    callback(response);
+                },
+                error: function(xhr, status, err) {
+                    spinner.hide();
+                    showErrorPopup('Whoa! Method returned an error. :(');
+                }
+            });
+        };
+
+        // shows popup when error occured
+        var showErrorPopup = function(message){
+            var alert = $('#error-alert');
+            alert.find('#error-message').text(message);
+            alert.modal();
+        };
+
+        // column constructor for EPAM
+        var ColumnEpam = function(json, pathToArray, url, isEPAM, from){
             var self = this;
 
             function itemInfoShow(itemInfo, leftColumn, columnRight, itemUrl){
@@ -170,8 +275,8 @@
                 return $card;
             }
 
-            self.page = isEPAM ? from : parseInt(json['page']['number']); //current page number (taken from json)
-            self.totalPages = isEPAM ? Math.floor(parseInt(json['hits']['total']) /20 )  : parseInt(json['page']['totalPages']); // total page number (taken from json)
+            self.page = from ; //current page number (taken from json)
+            self.totalPages = Math.floor(parseInt(json['hits']['total']) /20 ); // total page number (taken from json)
             console.log('self.paging', self.page,' of ',self.totalPages);
             //self.max_score = isEPAM ? (parseFloat(json['hits']['max_score'])) || 'none' : 'default';
             //console.log('self.max_score',self.max_score);
@@ -184,35 +289,28 @@
                 /*details column*/
                     columnRight = $('<div class="list-group-item row"></div>'),
                     titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
-                    responseDetailContainer = $('#response-detail'); // column wrappoer in DOM
+                    responseDetailContainer = $('#response-detail'), // column wrappoer in DOM
+                    $googleMap = '<div id="js_google_map" class="google_map"></div>';
 
-                    //if(isEPAM){
-                    //    responseContainer.removeClass('col-xs-12').addClass('col-xs-6');
-                    //    responseDetailContainer.show();
-                    //}else{
-                    //    responseContainer.removeClass('col-xs-6').addClass('col-xs-12');
-                    //    responseDetailContainer.hide();
-                    //}
-
+                responseContainer.toggleClass("col-xs-6 col-xs-12");
+                responseDetailContainer.removeClass("col-xs-12").addClass("col-xs-6").show(); //show right column
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
 
-                if(isEPAM){
-                    var flickrImagesCard = getEventsFlickrImagesCard(array);
-                    if(flickrImagesCard) columnRight.append(flickrImagesCard);
-                    columnRight.append('<div id="js_google_map" class="google_map"></div>');  // append Google maps
-                }
+                var flickrImagesCard = getEventsFlickrImagesCard(array);
+                if(flickrImagesCard) columnRight.append(flickrImagesCard);
+                columnRight.append($googleMap);  // append Google maps
 
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
                         leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
-                        name = $('<div>' + '<b>name: </b>' + (isEPAM ? array[item]['_source']['name'] : array[item].name) + '</div>'), // item name
-                        id = $('<div id="id">' + '<b>id : </b>' + (isEPAM ? array[item]['_source']['id'] : array[item].id) + '</div>'), // item id
+                        name = $('<div>' + '<b>name: </b>' + array[item]['_source']['name'] + '</div>'), // item name
+                        id = $('<div id="id">' + '<b>id : </b>' +  array[item]['_source']['id']  + '</div>'), // item id
 
-                        itemUrl = isEPAM ? array[item]['_source']['eventUrl'] : array[item].eventUrl, // item URL
-                        itemInfo = isEPAM ? array[item]['_source']['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+                        itemUrl = array[item]['_source']['eventUrl'] , // item URL
+                        itemInfo = array[item]['_source']['info'] || 'undefined item' ; // item info from EPAM only
 
-                    listItem.data('id', (isEPAM ? array[item]['_source']['id'] : array[item].id));
+                    listItem.data('id',array[item]['_source']['id'] );
 
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
@@ -242,9 +340,9 @@
 
             self.initMap = function(selectorId, center, zoom, markers){
                 var map = new google.maps.Map(document.getElementById(selectorId), {
-                        center: center,
-                        zoom: 3
-                    });
+                    center: center,
+                    zoom: 3
+                });
 
                 for (var i in markers){
                     new google.maps.Marker({
@@ -268,7 +366,6 @@
                     titleCard = $('<a class="list-group-item active">Single card details</a>'); // column header
 
                 responseDetailContainer.append(titleCard);
-
                 for (var item in array){
                     var source = array[item]['_source'],
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
@@ -305,7 +402,6 @@
                             }
                         }
 
-
                         if(_.isObject(source.location)){
 
                             responseDetailContainer.append('<div class="clearfix"></div>');
@@ -316,6 +412,7 @@
                             };
                             self.initMap('js_google_map', center, 6, [center]);
                         }
+
                     }
 
                 }
@@ -345,33 +442,13 @@
                 });
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
-                if (isEPAM){
-                    runEPAMRequest(from - 20);
-                    return;
-                }
-                sendRequest(self.url + '&page=' + (self.page - 1), 'GET', null, function(response){
-                    new Column(response, pathToArray, self.url, isEPAM);
-                });
-
+                runEPAMRequest(from - 20);
+                return;
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
+                runEPAMRequest(from + 20);
+                return;
 
-                if (isEPAM){
-                    runEPAMRequest(from + 20);
-                    return;
-                }
-                //console.log('self.goToNextPage pressed','isEPAM:',isEPAM);
-                //console.log('new url', url);
-                /**
-                 * @url -string
-                 * @method - string
-                 * data - object
-                 * callback - function
-                 */
-                sendRequest(self.url + '&page=' + (self.page + 1), 'GET', null ,function(response){
-                    //console.log('***build new column',response);
-                    new Column(response, pathToArray, self.url, isEPAM);
-                });
             };
 
             self.initGroupEventsMap = function(){
@@ -388,43 +465,12 @@
             };
 
             self.render();
-            if(isEPAM) self.initGroupEventsMap();
+            self.initGroupEventsMap();
             self.setListeners();
         };
 
-        // returns keyword
-        var getKeywordValue = function(){
-            return $('#text-to-search').val();
-        };
-
-        //universal ajax request sender
-        var sendRequest = function(url, method, data, callback){
-            spinner.show();
-            console.info('dataSend:' , data);
-
-            $.ajax({
-                type: method,
-                url: url,
-                async: true,
-                data: data ? JSON.stringify(data) : "",
-                success: function(response, textStatus, jqXHR) {
-                    spinner.hide();
-                    console.info('response ' , response);
-                    callback(response);
-                },
-                error: function(xhr, status, err) {
-                    spinner.hide();
-                    showErrorPopup('Whoa! Method returned an error. :(');
-                }
-            });
-        };
-
-        // shows popup when error occured
-        var showErrorPopup = function(message){
-            var alert = $('#error-alert');
-            alert.find('#error-message').text(message);
-            alert.modal();
-        };
-
     });
+
+
+
 })();
