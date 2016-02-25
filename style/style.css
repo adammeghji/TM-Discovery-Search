@@ -175,7 +175,22 @@
     border-radius: 3px;
 }
 
+/*autocomplete*/
+.tt-menu {
+    background-color: #ffffff;
+    padding: 0 20px;
+    border: 1px solid #f0f0f0;
+    width: 100%;
+}
+.tt-suggestion {
+    cursor: pointer;
+    margin: 10px 0;
+}
+.tt-suggestion:hover {
+    color: #337ab7;
+}
 
+/*autocomplete END*/
 
 
 
