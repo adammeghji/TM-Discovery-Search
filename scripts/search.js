@@ -407,9 +407,16 @@
                         }
                     }
 
+                    
                     for(var item in rawAttractionList){
+                        try {
                         if(rawAttractionList[item].image.url && rawAttractionList[item].name)
                             attractionList.push({url: rawAttractionList[item].image.url, name: rawAttractionList[item].name});
+                        }
+                        catch (e) {
+                            console.log("!!!!!!!!! "+e.message);
+                        }
+                        
                     }
 
                     attractionList = _.filter(attractionList, function(_obj){
