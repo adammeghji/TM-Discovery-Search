@@ -22,7 +22,7 @@ $( "#search_keyword_TM" ).click(function() {
 
           for (var i = 0; i < events.length; i++) {
             var item = $(eventToListItem(events[i]));
-            $('#search_keyword_TM_result').append(item)
+            $('#search_keyword_TM_result').append(item);
             item.click(events[i],
                 function(eventClick) {
                     fillModalFromItem(eventClick.data);
@@ -306,8 +306,6 @@ var eventToListItem = function(event) {
 var fillModalFromItem = function(event) {
     $('#myModal .modal-body').empty();
 
-
-
   //  $('#myModal .modal-body').append(syntaxHighlight(JSON.stringify(event,null,2)));
     var node = new PrettyJSON.view.Node({
       el:$('#myModal .modal-body'),
@@ -317,7 +315,7 @@ var fillModalFromItem = function(event) {
     $('#myModal .modal-body').append(node);
 
 
-}
+};
 
 var searchToListItem = function(search) {
     var event = search.source;
