@@ -55,11 +55,17 @@
             if (getApproach() === "TM") {
                 responseContainer.removeClass("col-xs-6").addClass("col-xs-12"); //show right column
                 responseDetailContainer.hide(); //hide right column
+
+                $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
+                    console.log('Selection: ' + suggestion);
+                });
+
                 runTMRequest(); // run TM request
             }else{
                 responseContainer.addClass("col-xs-6").removeClass("col-xs-12"); //show right column
                 responseDetailContainer.show(); //show right column
                 runEPAMRequest(); // run EPAM request
+                autoCompleteRunner();
             }
         });
 
@@ -696,6 +702,10 @@
         }
 
         var eventMatcher = function() {
+            if (getApproach()==='TM'){
+                $('.twitter-typeahead').css("display","block");
+                return;
+            }
 
             return function findMatches(q, cb) {
                 var EPAM_data = {
@@ -726,16 +736,23 @@
             }
         };
 
-        $('#text-to-search').typeahead({
-          hint: true,
-          highlight: true,
-          minLength: 1
-        },
-        {
-          name: 'events',
-          source: eventMatcher()
-        });
-        $('.twitter-typeahead').css("display","block");
+        var autoCompleteRunner = function() {
+            if (getApproach() !== 'TM') {
+                console.log(getApproach());
+                $('#text-to-search').typeahead({
+                        hint: true,
+                        highlight: true,
+                        minLength: 1
+                    },
+                    {
+                        name: 'events',
+                        source: eventMatcher()
+                    });
+                $('.twitter-typeahead').css("display", "block");
+
+            }
+        }
+
 
     });
 
