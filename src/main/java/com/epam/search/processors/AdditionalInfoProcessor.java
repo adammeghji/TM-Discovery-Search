@@ -59,12 +59,12 @@ public class AdditionalInfoProcessor {
         }
 
         if (additionalInfo.attractions != null && !additionalInfo.attractions.isEmpty()) {
-            info(this, "got WIKI Venues processorr");
+            info(this, "got TM attr processorr");
             merged.setAttractions(additionalInfo.getAttractions());
         }
 
         if (additionalInfo.venues != null && !additionalInfo.venues.isEmpty()) {
-            info(this, "got TM processorr");
+            info(this, "got TM venue processorr");
             merged.setVenues(additionalInfo.getVenues());
         }
 
@@ -119,7 +119,7 @@ public class AdditionalInfoProcessor {
         */
         if (original.attractions == null || original.attractions.isEmpty()) {
             try {
-                info(this, "call TM processor");
+                info(this, "call TM attr processor");
                 Set<TMProcessor.ArtistInfo> newAttractions = tmProcessor.fetchAttractionInfo(attractions);
                 if (!newAttractions.isEmpty()) {
                     info.setAttractions(newAttractions);
@@ -129,7 +129,7 @@ public class AdditionalInfoProcessor {
 
         if (original.venues == null || original.venues.isEmpty()) {
             try {
-                info(this, "call TM processor");
+                info(this, "call TM venue processor");
                 Set<TMProcessor.VenueInfo> newVenues = tmProcessor.fetchVenueInfo(venues);
                 if (!newVenues.isEmpty()) {
                     info.setVenues(newVenues);
