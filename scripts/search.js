@@ -336,6 +336,28 @@
                 responseDetailContainer.append(titleRight).append(columnRight);
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
+
+
+            self.initMap = function(selectorId, center, zoom, markers){
+                var map = new google.maps.Map(document.getElementById(selectorId), {
+                    center: center,
+                    zoom: 3
+                });
+
+                for (var i in markers){
+                    new google.maps.Marker({
+                        position: {
+                            lat: markers[i].lat,
+                            lng: markers[i].lng
+                        },
+                        map: map
+                    });
+                }
+
+                return map;
+            };
+
+
             self.renderCardDetail = function(responseDetailContainer , idDetail){
                 var eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
                 var array = Object.byString(json, pathToArray), // get array of items
@@ -345,9 +367,10 @@
 
                 responseDetailContainer.append(titleCard);
                 for (var item in array){
-                    var idList = array[item]['_source']['id'] || 'undefined item' , // item info from EPAM only
-                        itemAttractions = array[item]['_source']['_embedded']['attractions'] , //override item URL
-                        itemInfo =  array[item]['_source']['info'] || 'undefined item'; // item info from EPAM only
+                    var source = array[item]['_source'],
+                        idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
+                        itemAttractions = isEPAM ? source['_embedded']['attractions'] : 'not used in TM', //override item URL
+                        itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
 
                     //render cardSingleRight
                     if(idList === idDetail) {
@@ -377,6 +400,17 @@
                                 console.log('itemAttractions-url ' , itemAttractions[i]);
 
                             }
+                        }
+
+                        if(_.isObject(source.location)){
+
+                            responseDetailContainer.append('<div class="clearfix"></div>');
+                            responseDetailContainer.append('<div id="js_google_map" class="google_map"></div>');
+                            var center = {
+                                lat: source.location.lat,
+                                lng: source.location.lon
+                            };
+                            self.initMap('js_google_map', center, 6, [center]);
                         }
 
                     }
@@ -420,26 +454,14 @@
             self.initGroupEventsMap = function(){
                 var array = Object.byString(json, pathToArray),
                     center = {lat: 39.3648338, lng: -101.4381589},
-                    map = new google.maps.Map(document.getElementById('js_google_map'), {
-                        center: center,
-                        zoom: 3
-                    });
+                    markers = [];
 
                 for (var item in array){
                     var location = array[item]['_source'].location;
-                    //console.log(location);
-                    if(location){
-                        new google.maps.Marker({
-                            position: {
-                                lat: location.lat,
-                                lng: location.lon
-                            },
-                            map: map
-                        });
-                    }
+                    if(location) markers.push({lat: location.lat, lng: location.lon});
                 }
 
-                return map;
+                self.initMap('js_google_map', center, 3, markers);
             };
 
             self.render();

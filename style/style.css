@@ -98,6 +98,7 @@
 /* Google maps */
 .google_map {
     height: 262px;
+    margin-bottom: 20px;
 }
 
 /* Flickr Card */
@@ -122,12 +123,12 @@
 
 /* background colors */
 .flickr_card .flickr_card__item:nth-child(3n+2) {
-    background-color: yellow;
+    background-color: #dfe9c9;
 }
 
 .flickr_card .flickr_card__item:nth-child(5),
 .flickr_card .flickr_card__item:nth-child(3n+3){
-    background-color: #f7584c;
+    background-color: #eeede6;
 }
 
 .flickr_card .flickr_card__item:nth-child(6),
@@ -136,7 +137,7 @@
 }
 
 .flickr_card .flickr_card__item:nth-child(7) {
-    background-color: #f9bc2b;
+    background-color: #dfe9c9;
 }
 
 
