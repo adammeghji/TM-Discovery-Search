@@ -425,7 +425,7 @@
 
                     attractionList = _.uniqBy(attractionList, 'url');
                     attractionList = _.slice(attractionList, [start = 0], [end = 2]);
-                    self.initAttractionsCard(columnRight, attractionList);
+                    self.initAttractionsCard(columnRight, attractionList, true);
 
                     columnRight.append('<div id="js_google_map" class="google_map"></div>');  // append Google maps
                 }
@@ -469,12 +469,15 @@
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
 
-            self.initAttractionsCard = function($appendTo, attractions){
+            self.initAttractionsCard = function($appendTo, attractions, addSource){
                 var source = 'http://s1.ticketm.net/tm/en-us',
                     $card = $("<div class='attraction_card attraction_card-" + attractions.length + "'></div>");
                 for(var i in attractions){
-                    var $cardItem = $("<div class='attraction_card__item'>" + attractions[i].name + "</div>");
-                    $cardItem.css({backgroundImage: 'url(' + source + attractions[i].url +')'});
+                    var url = addSource ? source + attractions[i].url : attractions[i].url,
+                        $cardItem = $("<div class='attraction_card__item'></div>");
+
+                    if(attractions[i].name) $cardItem.text(attractions[i].name);
+                    if(url) $cardItem.css({backgroundImage: 'url(' + url +')'});
                     $card.append($cardItem);
                 }
 
@@ -527,27 +530,24 @@
                                 responseDetailContainer.append($('<div class="crop-image-flick col-xs-6"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
                             }
                         }
-                        //console.log('itemAttractions' , itemAttractions[0].image.url);
 
-                        //if (itemAttractions.url && itemAttractions[0].image.url) { // apend img if it exist
-                        //    console.log('itemAttractions' ,itemAttractions[0].image.url);
-                        //    eventPicHost += itemAttractions[0].image.url;
-                        //    responseDetailContainer.append($('<div class="double-height col-xs-12"><img src=" '+eventPicHost+'" class="img-responsive"><span>attraction img</span></div>' ));
-                        //
-                        //    if( itemAttractions[1] ) {
-                        //        eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
-                        //        eventPicHost += itemAttractions[1].image.url;
-                        //        responseDetailContainer.append($('<div class="double-height col-xs-6"><img src=" ' + eventPicHost + '" class="img-responsive"></div>'));
-                        //    }
-                        //
-                        //    for(var i=1; i<itemAttractions.length, i<3; i++){
-                        //        console.log('itemAttractions-url ' , itemAttractions[i]);
-                        //
-                        //    }
-                        //}
+                        responseDetailContainer.append('<div class="clearfix" style="margin-bottom: 20px;"></div>');
 
-                        responseDetailContainer.append('<div class="clearfix"></div>');
+                        // Universe page
+                        if(itemInfo.universePage){
+                            if(itemInfo.universePage.description || itemInfo.universePage.images){
+                                var universe = [
+                                    {
+                                        name: itemInfo.universePage.description,
+                                        url: itemInfo.universePage.images[0]
+                                    }
+                                ];
+                                self.initAttractionsCard(responseDetailContainer, universe, false);
+                            }
+                            console.log(itemInfo.universePage);
+                        }
 
+                        // Attractions
                         for(var item in itemAttractions){
                             try {
                             if(itemAttractions[item].image.url && itemAttractions[item].name)
@@ -561,10 +561,25 @@
 
                         attractionList = _.uniqBy(attractionList, 'url');
                         attractionList = _.slice(attractionList, [start = 0], [end = 2]);
-                        self.initAttractionsCard(responseDetailContainer, attractionList);
+                        self.initAttractionsCard(responseDetailContainer, attractionList, true);
 
+                        // Venues
+                        if(_.isObject(itemInfo)){
+                            if(_.isArray(itemInfo.venues)){
+                                if(itemInfo.venues.length){
+                                    var venue = [
+                                        {
+                                            name: itemInfo.venues[0].name,
+                                            url: itemInfo.venues[0].image
+                                        }
+                                    ];
+                                    self.initAttractionsCard(responseDetailContainer, venue, false);
+                                }
+                            }
+                        }
+
+                        // Map
                         if(_.isObject(source.location)){
-
                             responseDetailContainer.append('<div class="clearfix"></div>');
                             responseDetailContainer.append('<div id="js_google_map" class="google_map"></div>');
                             var center = {
