@@ -481,7 +481,9 @@
                     var url = addSource ? source + attractions[i].url : attractions[i].url,
                         $cardItem = $("<div class='attraction_card__item'></div>");
 
-                    if(attractions[i].name) $cardItem.text(attractions[i].name);
+                    if(attractions[i].name)
+                        $cardItem.append("<div class='card_label'>" + attractions[i].name + "</div>");
+
                     if(url) $cardItem.css({backgroundImage: 'url(' + url +')'});
                     $card.append($cardItem);
                 }
@@ -536,7 +538,7 @@
                             }
                         }
 
-                        responseDetailContainer.append('<div class="clearfix" style="margin-bottom: 20px;"></div>');
+                        responseDetailContainer.append('<div class="clearfix"></div>');
 
                         // Universe page
                         if(itemInfo.universePage){
