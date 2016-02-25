@@ -504,6 +504,14 @@
           };
         };
 
+        function load() {
+            var request = '{ "fields" : ["name"], "query" :{ "match_phrase_prefix" : { "_all":{"query":"ZZ top"}}}}';
+            sendRequest(url, 'GET', EPAM_data, function(json){
+                //new Column(json, 'hits.hits', url, true, from ? from : 0);
+                new ColumnEpam(json, 'hits.hits', url, true, from ? from : 0);
+            });
+        }
+
         var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
           'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
           'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
