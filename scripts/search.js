@@ -663,56 +663,66 @@
             self.setListeners();
         };
 
-        // Auto Completion
-        var substringMatcher = function(strs) {
-          return function findMatches(q, cb) {
-            var matches, substringRegex;
+        function uniques(arr) {
+            var a = [];
+            for (var i=0, l=arr.length; i<l; i++)
+                if (a.indexOf(arr[i]) === -1 && arr[i] !== '')
+                    a.push(arr[i]);
+            return a;
+        }
 
-            // an array that will be populated with substring matches
-            matches = [];
-
-            // regex used to determine if a string contains the substring `q`
-            substrRegex = new RegExp(q, 'i');
-
-            // iterate through the pool of strings and for any string that
-            // contains the substring `q`, add it to the `matches` array
-            $.each(strs, function(i, str) {
-              if (substrRegex.test(str)) {
-                matches.push(str);
-              }
-            });
-
-            cb(matches);
-          };
-        };
-
-        function load() {
-            var request = '{ "fields" : ["name"], "query" :{ "match_phrase_prefix" : { "_all":{"query":"ZZ top"}}}}';
-            sendRequest(url, 'GET', EPAM_data, function(json){
-                //new Column(json, 'hits.hits', url, true, from ? from : 0);
-                new ColumnEpam(json, 'hits.hits', url, true, from ? from : 0);
+        function load(query, cb) {
+            var request = '{ "fields" : ["name"], "size":300, "query" :{ "match_phrase_prefix" : { "name":"' + query + '"}}}';
+            sendRequest(search_keyword_EPAM_url, 'GET', request, function(json){
+                if(json.hits && json.hits.hits && json.hits.hits.length > 0) {
+                    var result = [];
+                    for(var i in json.hits.hits) {
+                        result.push(json.hits.hits[0]._source.name);
+                    }
+                    result = uniques(result);
+                    cb(result);
+                }
             });
         }
 
-        var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-          'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-          'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-          'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-          'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-          'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-          'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-          'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-          'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-        ];
+        var eventMatcher = function() {
+            return function findMatches(q, cb) {
+                EPAM_data = {
+                    "size" : 50,
+                    "query": {
+                        "match_phrase_prefix": {
+                            "name": {
+                                "query" : q
+                            }
+                        }
+                    }
+                };
+                sendRequest(search_keyword_EPAM_url, 'POST', EPAM_data, function(json){
+                    if(json.hits && json.hits.hits && json.hits.hits.length > 0) {
+                        var result = [];
+                        for(var i in json.hits.hits) {
+//                            if(json.hits.hits[i].fields && json.hits.hits[i].fields.name && json.hits.hits[i].fields.name[0])
+//                                result.push(json.hits.hits[i].fields.name[0]);
+                                if(json.hits.hits[i]._source.name)
+                                    result.push(json.hits.hits[i]._source.name);
+                        }
+                        debugger
+                        result = uniques(result);
+
+                        cb(result);
+                    }
+                });
+            }
+        };
 
         $('#text-to-search').typeahead({
           hint: true,
           highlight: true,
-          minLength: 2
+          minLength: 1
         },
         {
           name: 'events',
-          source: substringMatcher(states)
+          source: eventMatcher()
         });
 
     });

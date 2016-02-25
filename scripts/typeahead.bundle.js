@@ -1705,9 +1705,9 @@
                 this.source(query, sync, async);
                 !syncCalled && sync([]);
                 function sync(suggestions) {
-                    if (syncCalled) {
-                        return;
-                    }
+//                    if (syncCalled) {
+//                        return;
+//                    }
                     syncCalled = true;
                     suggestions = (suggestions || []).slice(0, that.limit);
                     rendered = suggestions.length;
