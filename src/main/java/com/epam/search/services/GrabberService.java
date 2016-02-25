@@ -7,4 +7,6 @@ public interface GrabberService {
     void grab(int from, int to);
 
     void grab(int from);
+
+    void grab(String phrase);
 }
