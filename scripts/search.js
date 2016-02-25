@@ -312,33 +312,36 @@
                 var flickrImagesCard = getEventsFlickrImagesCard(array);
                 if(flickrImagesCard) columnRight.append(flickrImagesCard);
 
-                var rawAttractionList = [],
-                    attractionList = [];
-                for (var item in array){
-                    try {
-                        var attractions = array[item]['_source']['_embedded']['attractions'];
-                        if(_.isArray(attractions))
-                            rawAttractionList = _.concat(rawAttractionList, attractions)
+
+                if(array.length){
+                    var rawAttractionList = [],
+                        attractionList = [];
+                    for (var item in array){
+                        try {
+                            var attractions = array[item]['_source']['_embedded']['attractions'];
+                            if(_.isArray(attractions))
+                                rawAttractionList = _.concat(rawAttractionList, attractions)
+                        }
+                        catch (err){
+                            console.log(err);
+                        }
                     }
-                    catch (err){
-                        console.log(err);
+
+                    for(var item in rawAttractionList){
+                        if(rawAttractionList[item].image.url && rawAttractionList[item].name)
+                            attractionList.push({url: rawAttractionList[item].image.url, name: rawAttractionList[item].name});
                     }
+
+                    attractionList = _.filter(attractionList, function(_obj){
+                        return _obj.url && _obj.name
+                    });
+
+                    attractionList = _.uniqBy(attractionList, 'url');
+                    attractionList = _.slice(attractionList, [start = 0], [end = 2]);
+                    self.initAttractionsCard(columnRight, attractionList);
+
+                    columnRight.append('<div id="js_google_map" class="google_map"></div>');  // append Google maps
                 }
-
-                for(var item in rawAttractionList){
-                    if(rawAttractionList[item].image.url && rawAttractionList[item].name)
-                        attractionList.push({url: rawAttractionList[item].image.url, name: rawAttractionList[item].name});
-                }
-
-                attractionList = _.filter(attractionList, function(_obj){
-                    return _obj.url && _obj.name
-                });
-
-                attractionList = _.uniqBy(attractionList, 'url');
-                attractionList = _.slice(attractionList, [start = 0], [end = 2]);
-                self.initAttractionsCard(columnRight, attractionList);
-
-                columnRight.append('<div id="js_google_map" class="google_map"></div>');  // append Google maps
 
 
 
@@ -423,6 +426,7 @@
                     var source = array[item]['_source'],
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
                         itemAttractions = isEPAM ? source['_embedded']['attractions'] : 'not used in TM', //override item URL
+                        attractionList = [],
                         itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
 
                     //render cardSingleRight
@@ -438,22 +442,37 @@
                         }
                         //console.log('itemAttractions' , itemAttractions[0].image.url);
 
-                        if (itemAttractions.url && itemAttractions[0].image.url) { // apend img if it exist
-                            console.log('itemAttractions' ,itemAttractions[0].image.url);
-                            eventPicHost += itemAttractions[0].image.url;
-                            responseDetailContainer.append($('<div class="double-height col-xs-12"><img src=" '+eventPicHost+'" class="img-responsive"><span>attraction img</span></div>' ));
+                        //if (itemAttractions.url && itemAttractions[0].image.url) { // apend img if it exist
+                        //    console.log('itemAttractions' ,itemAttractions[0].image.url);
+                        //    eventPicHost += itemAttractions[0].image.url;
+                        //    responseDetailContainer.append($('<div class="double-height col-xs-12"><img src=" '+eventPicHost+'" class="img-responsive"><span>attraction img</span></div>' ));
+                        //
+                        //    if( itemAttractions[1] ) {
+                        //        eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
+                        //        eventPicHost += itemAttractions[1].image.url;
+                        //        responseDetailContainer.append($('<div class="double-height col-xs-6"><img src=" ' + eventPicHost + '" class="img-responsive"></div>'));
+                        //    }
+                        //
+                        //    for(var i=1; i<itemAttractions.length, i<3; i++){
+                        //        console.log('itemAttractions-url ' , itemAttractions[i]);
+                        //
+                        //    }
+                        //}
 
-                            if( itemAttractions[1] ) {
-                                eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
-                                eventPicHost += itemAttractions[1].image.url;
-                                responseDetailContainer.append($('<div class="double-height col-xs-6"><img src=" ' + eventPicHost + '" class="img-responsive"></div>'));
-                            }
+                        responseDetailContainer.append('<div class="clearfix"></div>');
 
-                            for(var i=1; i<itemAttractions.length, i<3; i++){
-                                console.log('itemAttractions-url ' , itemAttractions[i]);
-
-                            }
+                        for(var item in itemAttractions){
+                            if(itemAttractions[item].image.url && itemAttractions[item].name)
+                                attractionList.push({url: itemAttractions[item].image.url, name: itemAttractions[item].name});
                         }
+
+                        attractionList = _.filter(attractionList, function(_obj){
+                            return _obj.url && _obj.name
+                        });
+
+                        attractionList = _.uniqBy(attractionList, 'url');
+                        attractionList = _.slice(attractionList, [start = 0], [end = 2]);
+                        self.initAttractionsCard(responseDetailContainer, attractionList);
 
                         if(_.isObject(source.location)){
 
@@ -505,16 +524,18 @@
             };
 
             self.initGroupEventsMap = function(){
-                var array = Object.byString(json, pathToArray),
-                    center = {lat: 39.3648338, lng: -101.4381589},
-                    markers = [];
+                var array = Object.byString(json, pathToArray);
+                if(array.length){
+                    var center = {lat: 39.3648338, lng: -101.4381589},
+                        markers = [];
 
-                for (var item in array){
-                    var location = array[item]['_source'].location;
-                    if(location) markers.push({lat: location.lat, lng: location.lon});
+                    for (var item in array){
+                        var location = array[item]['_source'].location;
+                        if(location) markers.push({lat: location.lat, lng: location.lon});
+                    }
+
+                    self.initMap('js_google_map', center, 3, markers);
                 }
-
-                self.initMap('js_google_map', center, 3, markers);
             };
 
             self.render();
