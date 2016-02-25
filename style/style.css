@@ -189,8 +189,12 @@
 .tt-suggestion:hover {
     color: #337ab7;
 }
-
 /*autocomplete END*/
+
+/*text card*/
+.text_card {
+    font-size: 0.8em;
+}
 
 
 
