@@ -61,6 +61,11 @@ public class AdditionalInfoProcessor {
             merged.setAttractions(additionalInfo.getAttractions());
         }
 
+        if (additionalInfo.venues != null && !additionalInfo.venues.isEmpty()) {
+            info(this, "got TM processorr");
+            merged.setVenues(additionalInfo.getVenues());
+        }
+
         if (additionalInfo.getUniversePage() != null) {
             info(this, "got Content processor");
             merged.setUniversePage(additionalInfo.getUniversePage());
@@ -110,6 +115,14 @@ public class AdditionalInfoProcessor {
             }
         }
 
+        if (original.venues == null || original.venues.isEmpty()) {
+            info(this, "call TM processor");
+            Set<TMProcessor.VenueInfo> newVenues = tmProcessor.fetchVenueInfo(venues);
+            if (!newVenues.isEmpty()) {
+                info.setVenues(newVenues);
+            }
+        }
+
         if (original.getUniversePage() == null) {
             info(this, "call Content processor");
             Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
@@ -131,6 +144,7 @@ public class AdditionalInfoProcessor {
         private UniversePage universePage;
         private Set<String> flickrImages;
         private Set<TMProcessor.ArtistInfo> attractions;
+        private Set<TMProcessor.VenueInfo> venues;
         private Map<String, String> wikiAttractions;
         private Map<String, String> wikiVenues;
 
@@ -173,6 +187,10 @@ public class AdditionalInfoProcessor {
         public void setAttractions(Set<TMProcessor.ArtistInfo> attractions) {
             this.attractions = attractions;
         }
+
+        public Set<TMProcessor.VenueInfo> getVenues() { return venues; }
+
+        public void setVenues(Set<TMProcessor.VenueInfo> venues) { this.venues = venues; }
 
         public Map<String, String> getWikiAttractions() {
             return wikiAttractions;
