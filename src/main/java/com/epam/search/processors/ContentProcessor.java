@@ -100,7 +100,7 @@ public class ContentProcessor {
                 return Optional.of(br.lines().collect(Collectors.joining(System.lineSeparator())));
             }
         } catch (Exception e) {
-            error(this, "Content unavailable for : " + eventUrl);
+            error(this, "Content unavailable for URL: " + eventUrl);
             return Optional.empty();
         }
     }

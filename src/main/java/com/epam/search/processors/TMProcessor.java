@@ -43,6 +43,7 @@ public class TMProcessor {
         info(this, "Trying to fetch data from : " + url);
         String biography = parseContent(result);
         if (isBlank(biography)) {
+            info(this, "TicketMaster fetched for NO DATA");
             return Optional.empty();
         } else {
             info(this, "TicketMaster fetched for : " + name + "\t" + biography);
