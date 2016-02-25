@@ -456,14 +456,18 @@
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
                 }
+
+                console.log(self.page, self.totalPages);
+
                 self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
-                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
-                self.paging = $('<p id="paging">' + 'page ' + (self.page/20) + ' of ' + ( Math.floor(parseInt(self.totalPages)/20) ) + '</p>'); // display current page of total
+                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - 20 ) ? ('class="disabled"') : '') +  '></a>'); // next page button
+                self.paging = $('<p id="paging">' + 'page ' + ((self.page/20) + 1) + ' of ' + (( Math.floor(parseInt(self.totalPages)/20) )  + 1) + '</p>'); // display current page of total
                 responseContainer.append(column);
                 /*right column*/
 
                 responseDetailContainer.empty(); // remove any previous columns
 
+                console.log(self.totalPages, 'self.totalPages');
                 if(self.totalPages > 0) {
                     responseContainer.append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
                     responseDetailContainer.append(columnRight);
