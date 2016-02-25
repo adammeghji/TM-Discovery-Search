@@ -696,8 +696,9 @@
         }
 
         var eventMatcher = function() {
+
             return function findMatches(q, cb) {
-                EPAM_data = {
+                var EPAM_data = {
                     "size" : 50,
                     "query": {
                         "match_phrase_prefix": {
@@ -716,7 +717,7 @@
                                 if(json.hits.hits[i]._source.name)
                                     result.push(json.hits.hits[i]._source.name);
                         }
-                        debugger
+                        //debugger
                         result = uniques(result);
 
                         cb(result);
@@ -734,6 +735,7 @@
           name: 'events',
           source: eventMatcher()
         });
+        $('.twitter-typeahead').css("display","block");
 
     });
 
