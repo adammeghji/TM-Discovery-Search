@@ -612,12 +612,14 @@
                 });
                 $('.js_left_list').on('click', function(e){ // list-group-item listener
                     var responseDetailContainer = $('#response-detail'),
+                        responseContainer = $('#response .list-group-item'),
                         me = $(this),
                         idDetail = $(this).data('id');
 
                     e.preventDefault();
-                    console.log(me);
-                    me.toggleClass('active');
+                    //console.log(me);
+                    responseContainer.removeClass('active');
+                    me.addClass('active');
 
                     responseDetailContainer.fadeOut(200, function() {
                         $(this).empty().show();
