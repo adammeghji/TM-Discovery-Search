@@ -68,9 +68,60 @@
             var keyword = getKeywordValue(),
                 url = search_keyword_TM_url + (keyword ? ('&keyword=' + keyword) : '');
 
-            sendRequest(url, 'GET', null, function(json){
+            var eventToListItem = function(event) {
+                var item = '<li class="list-group-item">'
+                item = item + event.id + '<br/>';
+                item = item + event.name + '<br/>';
+                item = item + '</li>'
+                return item;
+            };
+
+            //universal ajax request sender
+            var sendRequestTM = function(url, method, callback, json, callHeaders){
+                $.ajax({
+                    type: method,
+                    url: url,
+                    async: true,
+                    data: json,
+                    headers: callHeaders,
+                    success: function(response, textStatus, jqXHR) {
+
+                        callback(response);
+                    },
+                    error: function(xhr, status, err) {
+                        console.log(status + " - " + err);
+                    }
+                });
+            };
+
+            sendRequestTM(url, 'GET',
+                function(response){
+                    console.log(response)
+                    $('#response').empty();
+                    if (response._embedded == undefined) {
+                        $('#response').append("no result");
+                        return;
+                    }
+                    var events = response._embedded.events;
+
+                    for (var i = 0; i < events.length; i++) {
+                        var item = $(eventToListItem(events[i]));
+                        $('#response').append(item);
+                        item.click(events[i],
+                            function(eventClick) {
+                                console.log(eventClick.data);
+                                fillModalFromItem(eventClick.data);
+                                $('#myModal').modal({
+                                    show: 'false'
+                                });
+                            }
+                        );
+                    }
+                });
+
+            /*sendRequest(url, 'GET', null, function(json){
                 new Column(json, '_embedded.events', url, false);
-            });
+            });*/
         };
 
         // runs EPAM request
@@ -131,8 +182,7 @@
                     array = Object.byString(json, pathToArray), // get array of items
                     responseContainer = $('#response'); // column wrappoer in DOM
 
-                //$('#response-detail').hide();
-                //responseContainer.removeClass("col-xs-6").addClass("col-xs-12");
+
 
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
@@ -143,6 +193,9 @@
                         name = $('<div>' + '<b>name: </b>' + array[item].name + '</div>'), // item name
                         id = $('<div id="id">' + '<b>id : </b>' + array[item].id + '</div>'), // item id
                         itemUrl =  array[item].eventUrl; // item URL
+
+                    listItem.data('id',array[item] );
+                    console.log(listItem.data );
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
@@ -169,9 +222,14 @@
                 $('.js_left_list')
                 .on('dblclick', function(e){ // show modal
                     console.log('show modal now');
+                    fillModalFromItem(e.data);
+                    $('#myModal').modal({
+                        show: 'false'
+                    });
+
                 })
                 .on('click', function(e){ // color","orange
-                    $(this).css("background-color","gray");
+                    $(this).css("background-color","#f0f0f0");
                 });
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
@@ -310,8 +368,8 @@
             }
 
             self.page = from ; //current page number (taken from json)
-            self.totalPages = Math.floor(parseInt(json['hits']['total'])/20 ); // total page number (taken from json)
-            console.log('self.paging', self.page,' of ',self.totalPages , 'totalItems',Math.floor(parseInt(json['hits']['total'])));
+            self.totalPages = parseInt(json['hits']['total']); // total page number (taken from json)
+            console.log('self.paging', self.page,' of ',self.totalPages , 'totalItems' );
             //self.max_score = isEPAM ? (parseFloat(json['hits']['max_score'])) || 'none' : 'default';
             //console.log('self.max_score',self.max_score);
             self.url = url; // base url (with API key and keyword) without page parameter
@@ -362,7 +420,7 @@
                 }
                 self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
                 self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
-                self.paging = $('<p id="paging">' + 'page ' + (self.page) + ' of ' + (self.totalPages) + '</p>'); // display current page of total
+                self.paging = $('<p id="paging">' + 'page ' + (self.page/20) + ' of ' + ( Math.floor(parseInt(self.totalPages)/20) ) + '</p>'); // display current page of total
                 responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
 
                 /*right column*/
@@ -444,7 +502,7 @@
                                 lat: source.location.lat,
                                 lng: source.location.lon
                             };
-                            self.initMap('js_google_map', center, 6, [center]);
+                            self.initMap('js_google_map', center, 2, [center]);
                         }
 
                     }
@@ -476,11 +534,11 @@
                 });
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
-                runEPAMRequest(from - 1);
+                runEPAMRequest(from - 20);
                 return;
             };
             self.goToNextPage = function(){ // forms url with correct next page parameter, runs the query and builds new column with response data
-                runEPAMRequest(from + 1);
+                runEPAMRequest(from + 20);
                 return;
 
             };
