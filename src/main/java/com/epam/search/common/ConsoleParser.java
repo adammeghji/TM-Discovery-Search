@@ -78,7 +78,7 @@ public class ConsoleParser {
             } else {
                 if (config.contains(GOOGLE_FLAG))
                     ProcessorConfig.setGoogleProcessorEnabler(config.getBoolean(GOOGLE_FLAG));
-                if (config.contains(GOOGLE_FLAG))
+                if (config.contains(WIKI_FLAG))
                     ProcessorConfig.setWikiProcessorEnabler(config.getBoolean(WIKI_FLAG));
                 if (config.contains(NAME_FLAG))
                     result.setName(Optional.ofNullable(config.getString(NAME_FLAG)));

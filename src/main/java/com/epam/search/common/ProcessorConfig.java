@@ -5,7 +5,7 @@ package com.epam.search.common;
  */
 public class ProcessorConfig {
     private static boolean googleProcessorEnabler = false;
-    private static boolean wikiProcessorEnabler = true;
+    private static boolean wikiProcessorEnabler = false;
     private static boolean youtubeProcessorEnabler = true;
     private static boolean instagramProcessorEnabler = false;
     private static boolean foursquareProcessorEnabler = false;
