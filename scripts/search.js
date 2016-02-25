@@ -43,13 +43,29 @@
         });
 
         // get approach: 'TM' or 'EPAM' or 'FUZZY'
-        var getApproach = function(){
+        function getApproach(){
+
             var selected = $("input[type='radio'][name='approach']:checked");
-            if (selected.length > 0)
+            console.log(selected);
+            var responseContainer = $('#response'),
+                responseDetailContainer = $('#response-detail');
+            if (selected.length > 0) {
+                responseContainer.removeClass("col-xs-6").addClass("col-xs-12"); //show right column
+                responseDetailContainer.hide(); //hide right column
                 return selected.val();
-            else
+            }
+            else{
+                responseContainer.addClass("col-xs-6").removeClass("col-xs-12"); //show right column
+                responseDetailContainer.show(); //show right column
                 return false;
+            }
         };
+
+        $("input[type='radio'][name='approach']").on('change', function(){
+            getApproach();
+        });
+
+
 
         // runs TM request
         var runTMRequest = function(){
@@ -119,8 +135,8 @@
                     array = Object.byString(json, pathToArray), // get array of items
                     responseContainer = $('#response'); // column wrappoer in DOM
 
-                $('#response-detail').hide();
-                responseContainer.removeClass("col-xs-6").addClass("col-xs-12");
+                //$('#response-detail').hide();
+                //responseContainer.removeClass("col-xs-6").addClass("col-xs-12");
 
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
@@ -292,8 +308,8 @@
                     responseDetailContainer = $('#response-detail'), // column wrappoer in DOM
                     $googleMap = '<div id="js_google_map" class="google_map"></div>';
 
-                responseContainer.toggleClass("col-xs-6 col-xs-12");
-                responseDetailContainer.removeClass("col-xs-12").addClass("col-xs-6").show(); //show right column
+                //responseContainer.toggleClass("col-xs-6 col-xs-12");
+                //responseDetailContainer.removeClass("col-xs-12").addClass("col-xs-6").show(); //show right column
                 responseContainer.empty(); // remove any previous columns
                 column.append(title); // append header to column wrapper
 
