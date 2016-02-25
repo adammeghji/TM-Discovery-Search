@@ -549,8 +549,10 @@
                         responseDetailContainer.append('<div class="clearfix"></div>');
 
                         for(var item in itemAttractions){
+                            try {
                             if(itemAttractions[item].image.url && itemAttractions[item].name)
                                 attractionList.push({url: itemAttractions[item].image.url, name: itemAttractions[item].name});
+                            } catch (e) {console.log("!!!!!!!!!"+e.message);}
                         }
 
                         attractionList = _.filter(attractionList, function(_obj){
