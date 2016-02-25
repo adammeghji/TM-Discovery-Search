@@ -67,7 +67,7 @@
         var runTMRequest = function(){
             var keyword = getKeywordValue(),
                 url = search_keyword_TM_url + (keyword ? ('&keyword=' + keyword) : '');
-
+/*
             var eventToListItem = function(event) {
                 var item = '<li class="list-group-item">'
                 item = item + event.id + '<br/>';
@@ -118,10 +118,10 @@
                         );
                     }
                 });
-
-            /*sendRequest(url, 'GET', null, function(json){
+*/
+            sendRequest(url, 'GET', null, function(json){
                 new Column(json, '_embedded.events', url, false);
-            });*/
+            });
         };
 
         // runs EPAM request
@@ -185,7 +185,7 @@
 
 
                 responseContainer.empty(); // remove any previous columns
-                column.append(title); // append header to column wrapper
+                //column.append(title); // append header to column wrapper
 
                 for (var item in array){ // iterate through each item in array
                     var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
@@ -195,7 +195,7 @@
                         itemUrl =  array[item].eventUrl; // item URL
 
                     listItem.data('id',array[item] );
-                    console.log(listItem.data );
+                    //console.log(listItem.data );
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
@@ -376,7 +376,7 @@
             self.url = url; // base url (with API key and keyword) without page parameter
             self.render = function(){
                 var column = $('<div class="list-group"></div>'), // column wrapper
-                    title = $('<a class="list-group-item active">Events</a>'), // column header
+                    //title = $('<a class="list-group-item active">Events</a>'), // column header
                     array = Object.byString(json, pathToArray), // get array of items
                     responseContainer = $('#response'), // column wrappoer in DOM
                 /*details column*/
@@ -384,10 +384,8 @@
                     titleRight = $('<a class="list-group-item active">Details card</a>'), // column header
                     responseDetailContainer = $('#response-detail'); // column wrappoer in DOM
 
-                //responseContainer.toggleClass("col-xs-6 col-xs-12");
-                //responseDetailContainer.removeClass("col-xs-12").addClass("col-xs-6").show(); //show right column
                 responseContainer.empty(); // remove any previous columns
-                column.append(title); // append header to column wrapper
+                //column.append(title); // append header to column wrapper
 
                 var flickrImagesCard = getEventsFlickrImagesCard(array);
                 if(flickrImagesCard) columnRight.append(flickrImagesCard);
@@ -454,11 +452,18 @@
                 self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
                 self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
                 self.paging = $('<p id="paging">' + 'page ' + (self.page/20) + ' of ' + ( Math.floor(parseInt(self.totalPages)/20) ) + '</p>'); // display current page of total
-                responseContainer.append(column).append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
-
+                responseContainer.append(column);
                 /*right column*/
+
                 responseDetailContainer.empty(); // remove any previous columns
-                responseDetailContainer.append(titleRight).append(columnRight);
+
+                if(self.totalPages > 0) {
+                    responseContainer.append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
+                    responseDetailContainer.append(columnRight);
+                }else {
+                    columnRight.empty();
+                }
+
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
 
@@ -501,7 +506,7 @@
                     cardSingleRight = $('<div class="list-group-item row"></div>'),
                     titleCard = $('<a class="list-group-item active">Single card details</a>'); // column header
 
-                responseDetailContainer.append(titleCard);
+                //responseDetailContainer.append(titleCard);
                 for (var item in array){
                     var source = array[item]['_source'],
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
@@ -581,9 +586,12 @@
                 });
                 $('.js_left_list').on('click', function(e){ // list-group-item listener
                     var responseDetailContainer = $('#response-detail'),
+                        me = $(this),
                         idDetail = $(this).data('id');
 
                     e.preventDefault();
+                    console.log(me);
+                    me.toggleClass('active');
 
                     responseDetailContainer.fadeOut(200, function() {
                         $(this).empty().show();

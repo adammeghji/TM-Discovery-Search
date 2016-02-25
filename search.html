@@ -63,32 +63,38 @@
 
 <div class="row">
     <div class="row-container">
-        <div class="row" style="margin-top: 20px;">
-            <div class="col-xs-10"><input type="text" id="text-to-search" class="form-control" placeholder="Keyword to search"></div>
-            <div class="col-xs-2"><a href="#" class="btn btn-success btn-block" id="search-btn">Search</a></div>
-        </div>
-        <form role="form" style="margin-top: 10px;" id='select-approach' class="col-xs-12">
-            <div class="btn-group" data-toggle="buttons">
+
+        <form role="form" id='select-approach' class="col-xs-12">
+            <div class="row ">
+            <div class="btn-group" data-toggle="buttons" style="float:right">
                 <label class="btn btn-default active">
-                    <input type="radio" name="approach" value="TM" checked="checked">TM
+                    <input type="radio" name="approach" value="TM" checked="checked">Original
                 </label>
                 <label class="btn btn-default">
-                    <input type="radio" name="approach" value="EPAM">EPAM
+                    <input type="radio" name="approach" value="EPAM">Enchanced
                 </label>
             </div>
             <!--<label class="radio-inline">
                 <input type="radio" name="approach" value="FUZZY">EPAM fuzzy
             </label>-->
+            </div>
         </form>
+
+
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-xs-12"><input type="text" id="text-to-search" class="form-control" placeholder="Keyword to search"></div>
+            <div class="col-xs-2" style="display: none;"><a href="#" class="btn btn-success btn-block" id="search-btn">Search</a></div>
+        </div>
+        <div class="row">
+        <div class="row-container" style="margin-top: 20px;">
+            <div class="col-xs-12" id="response"></div>
+            <div class="col-xs-6" id="response-detail" style="display: none;"></div>
+        </div>
+    </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="row-container">
-        <div class="col-xs-12" id="response"></div>
-        <div class="col-xs-6" id="response-detail" style="display: none;"></div>
-    </div>
-</div>
+
 
 </div>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
