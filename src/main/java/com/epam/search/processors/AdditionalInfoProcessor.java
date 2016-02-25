@@ -19,6 +19,7 @@ public class AdditionalInfoProcessor {
     private SearchProcessor flickrProcessor = new FlickrProcessor();
     private TMProcessor tmProcessor = new TMProcessor();
     private WikiProcessor wikiProcessor = new WikiProcessor();
+    private YouTubeProcessor youTubeProcessor = new YouTubeProcessor();
 
     public Object process(Map<String, Object> event) {
         AdditionInfo original = null;
@@ -56,18 +57,23 @@ public class AdditionalInfoProcessor {
         }
 
         if (additionalInfo.wikiVenues != null && !additionalInfo.wikiVenues.isEmpty()) {
-            info(this, "got WIKI Venues processorr");
+            info(this, "got WIKI Venues processor");
             merged.setWikiVenues(additionalInfo.getWikiVenues());
         }
 
         if (additionalInfo.attractions != null && !additionalInfo.attractions.isEmpty()) {
-            info(this, "got TM attr processorr");
+            info(this, "got TM attr processor");
             merged.setAttractions(additionalInfo.getAttractions());
         }
 
         if (additionalInfo.venues != null && !additionalInfo.venues.isEmpty()) {
-            info(this, "got TM venue processorr");
+            info(this, "got TM venue processor");
             merged.setVenues(additionalInfo.getVenues());
+        }
+
+        if (additionalInfo.videos != null && !additionalInfo.videos.isEmpty()) {
+            info(this, "got You Tube processor");
+            merged.setVideos(additionalInfo.getVideos());
         }
 
         if (additionalInfo.getUniversePage() != null) {
@@ -100,7 +106,24 @@ public class AdditionalInfoProcessor {
         if (ProcessorConfig.isContentProcessorEnabler()) {
             processContent(original, eventUrl, info);
         }
+        if (ProcessorConfig.isYoutubeProcessorEnabler()) {
+            processYouTube(original, attractions, info);
+        }
         return info;
+    }
+
+    private void processYouTube(AdditionInfo original, ArrayList<Object> attractions, AdditionInfo info) {
+        if (original.videos == null || original.videos.isEmpty()) {
+            try {
+                info(this, "call You Tube processor");
+                Set<YouTubeProcessor.YouTubeInfo> newVideos = youTubeProcessor.fetchArtistInfo(attractions);
+                if (!newVideos.isEmpty()) {
+                    info.setVideos(newVideos);
+                }
+            } catch (Exception e) {
+                error(this, e);
+            }
+        }
     }
 
     private void processContent(AdditionInfo original, String eventUrl, AdditionInfo info) {
@@ -206,6 +229,7 @@ public class AdditionalInfoProcessor {
         private Set<TMProcessor.VenueInfo> venues;
         private Map<String, String> wikiAttractions;
         private Map<String, String> wikiVenues;
+        private Set<YouTubeProcessor.YouTubeInfo> videos;
 
         public AdditionInfo() {
         }
@@ -269,6 +293,14 @@ public class AdditionalInfoProcessor {
 
         public void setWikiVenues(Map<String, String> wikiVenues) {
             this.wikiVenues = wikiVenues;
+        }
+
+        public Set<YouTubeProcessor.YouTubeInfo> getVideos() {
+            return videos;
+        }
+
+        public void setVideos(Set<YouTubeProcessor.YouTubeInfo> videos) {
+            this.videos = videos;
         }
 
         @Override
