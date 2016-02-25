@@ -600,6 +600,16 @@
                             self.initMap('js_google_map', center, 2, [center]);
                         }
 
+                        // Biography
+                        if(itemInfo.attractions){
+                            if(itemInfo.attractions[0]){
+                                if(itemInfo.attractions[0].biography){
+                                    var $card = $("<div class='text_card'></div>").html(itemInfo.attractions[0].biography).prepend("<h4>Biography</h4>");
+                                    responseDetailContainer.append($card);
+                                }
+                            }
+                        }
+
                     }
 
                 }
