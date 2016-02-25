@@ -1,12 +1,13 @@
 package com.epam.search.processors;
 
 import com.epam.search.common.JsonHelper;
+import com.epam.search.common.ProcessorConfig;
 
 import java.util.*;
 
+import static com.epam.search.common.LoggingUtil.error;
 import static com.epam.search.common.LoggingUtil.info;
 import static org.apache.http.util.TextUtils.isBlank;
-import org.json.JSONObject;
 
 /**
  * Created by Dmytro_Kovalskyi on 19.02.2016.
@@ -83,40 +84,43 @@ public class AdditionalInfoProcessor {
         ArrayList<Object> venues = (ArrayList<Object>) ((Map) event.get("_embedded")).get("venue");
 
         AdditionInfo info = new AdditionInfo();
-/*
-        if (original.getGoogleData() == null || original.getGoogleData().isEmpty()) {
-            info(this, "call Google");
-            GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
-            info.setGoogleData(google);
+        if (ProcessorConfig.isGoogleProcessorEnabler()) {
+            processGoogle(original, eventName, info);
         }
-        */
-        if (original.flickrImages == null || original.flickrImages.isEmpty()) {
+        if (ProcessorConfig.isFlickrProcessorEnabler()) {
+            processFlickr(original, eventName, info);
+        }
+        if (ProcessorConfig.isWikiProcessorEnabler()) {
+            processWiki(original, attractions, venues, info);
+        }
+        if (ProcessorConfig.isTmProcessorEnabler()) {
+            processTM(original, attractions, venues, info);
+        }
+        if (ProcessorConfig.isContentProcessorEnabler()) {
+            processContent(original, eventUrl, info);
+        }
+        return info;
+    }
+
+    private void processContent(AdditionInfo original, String eventUrl, AdditionInfo info) {
+        if (original.getUniversePage() == null && eventUrl != null) {
             try {
-            info(this, "call Flickr");
-            Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
-            if (!flickrImages.isEmpty()) {
-                info.setFlickrImages(flickrImages);
-            }
-            } catch (Exception e) {}
-        }
-        /*
-        if (original.wikiAttractions == null || original.wikiAttractions.isEmpty()) {
-            info(this, "call WIKI Attraction processor");
-            Map<String, String> newWikiAttractions = wikiProcessor.fetchAttractionInfo(attractions);
-            if (!newWikiAttractions.isEmpty()) {
-                info.setWikiAttractions(newWikiAttractions);
+                info(this, "call Content processor");
+                Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
+                result.map(pr -> {
+                    UniversePage page = new UniversePage();
+                    page.addImage(pr.getImage());
+                    page.setDescription(pr.getDescription());
+                    info.setUniversePage(page);
+                    return "";
+                });
+            } catch (Exception e) {
+                error(this, e);
             }
         }
-        */
-        /*
-        if (original.wikiVenues == null || original.wikiVenues.isEmpty()) {
-            info(this, "call WIKI Venues processor");
-            Map<String, String> newWikiVenues = wikiProcessor.fetchVenuesInfo(venues);
-            if (!newWikiVenues.isEmpty()) {
-                info.setWikiVenues(newWikiVenues);
-            }
-        }
-        */
+    }
+
+    private void processTM(AdditionInfo original, ArrayList<Object> attractions, ArrayList<Object> venues, AdditionInfo info) {
         if (original.attractions == null || original.attractions.isEmpty()) {
             try {
                 info(this, "call TM processor");
@@ -124,7 +128,9 @@ public class AdditionalInfoProcessor {
                 if (!newAttractions.isEmpty()) {
                     info.setAttractions(newAttractions);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                error(this, e);
+            }
         }
 
         if (original.venues == null || original.venues.isEmpty()) {
@@ -134,27 +140,50 @@ public class AdditionalInfoProcessor {
                 if (!newVenues.isEmpty()) {
                     info.setVenues(newVenues);
                 }
-            } catch (Exception e) {}
-        }
-
-        if (original.getUniversePage() == null && eventUrl != null) {
-            try {
-            info(this, "call Content processor");
-            Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
-            result.map(pr -> {
-                UniversePage page = new UniversePage();
-                page.addImage(pr.getImage());
-                page.setDescription(pr.getDescription());
-                info.setUniversePage(page);
-                return "";
-            });
             } catch (Exception e) {
-                info(this, e.getMessage());
+                error(this, e);
             }
+        }
+    }
 
+    private void processWiki(AdditionInfo original, ArrayList<Object> attractions, ArrayList<Object> venues, AdditionInfo info) {
+        if (original.wikiAttractions == null || original.wikiAttractions.isEmpty()) {
+            info(this, "call WIKI Attraction processor");
+            Map<String, String> newWikiAttractions = wikiProcessor.fetchAttractionInfo(attractions);
+            if (!newWikiAttractions.isEmpty()) {
+                info.setWikiAttractions(newWikiAttractions);
+            }
         }
 
-        return info;
+
+        if (original.wikiVenues == null || original.wikiVenues.isEmpty()) {
+            info(this, "call WIKI Venues processor");
+            Map<String, String> newWikiVenues = wikiProcessor.fetchVenuesInfo(venues);
+            if (!newWikiVenues.isEmpty()) {
+                info.setWikiVenues(newWikiVenues);
+            }
+        }
+    }
+
+    private void processFlickr(AdditionInfo original, String eventName, AdditionInfo info) {
+        if (original.flickrImages == null || original.flickrImages.isEmpty()) {
+            try {
+                info(this, "call Flickr");
+                Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
+                if (!flickrImages.isEmpty()) {
+                    info.setFlickrImages(flickrImages);
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void processGoogle(AdditionInfo original, String eventName, AdditionInfo info) {
+        if (original.getGoogleData() == null || original.getGoogleData().isEmpty()) {
+            info(this, "call Google");
+            GoogleProcessor.GoogleResults.GoogleData google = googleProcessor.fetchLinks(eventName);
+            info.setGoogleData(google);
+        }
     }
 
 
@@ -266,7 +295,7 @@ public class AdditionalInfoProcessor {
 
         public void setDescription(String description) {
 
-                this.description = description;
+            this.description = description;
 
         }
 

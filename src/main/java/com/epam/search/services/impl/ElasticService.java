@@ -1,14 +1,21 @@
 package com.epam.search.services.impl;
 
 import com.epam.search.common.Config;
+import com.epam.search.services.SearchService;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.shield.ShieldPlugin;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.epam.search.common.LoggingUtil.error;
 import static com.epam.search.common.LoggingUtil.info;
@@ -24,6 +31,19 @@ public abstract class ElasticService {
                 .get();
     }
 
+    protected List<SearchService.SingleSearchResult> processSearchResult(SearchHits hits) {
+        List<SearchService.SingleSearchResult> result = new ArrayList<>();
+        SearchHit[] searchHits = hits.getHits();
+        for (SearchHit searchHit : searchHits) {
+            SearchService.SingleSearchResult singleResult = new SearchService.SingleSearchResult();
+            singleResult.setId(searchHit.getId());
+            singleResult.setScore(searchHit.getScore());
+            singleResult.setSource(searchHit.getSource());
+            result.add(singleResult);
+        }
+        return result;
+    }
+
     protected void insertSingleEvent(String eventJson, String id) {
         TransportClient client = createClient();
         info(this, "Inserts : " + eventJson);
@@ -33,6 +53,17 @@ public abstract class ElasticService {
                 .setId(id)
                 .get();
         client.close();
+    }
+
+    public List<SearchService.SingleSearchResult> search( String phrase) {
+        TransportClient client = createClient();
+        SearchResponse response = client.prepareSearch(RestSyncService.INDEX_NAME)
+                .setQuery(QueryBuilders.fuzzyQuery("name", phrase))
+                .setSize(100)
+                .execute()
+                .actionGet();
+        client.close();
+        return processSearchResult(response.getHits());
     }
 
     protected TransportClient createClient() {
