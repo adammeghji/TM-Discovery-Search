@@ -6,6 +6,7 @@ import java.util.*;
 
 import static com.epam.search.common.LoggingUtil.info;
 import static org.apache.http.util.TextUtils.isBlank;
+import org.json.JSONObject;
 
 /**
  * Created by Dmytro_Kovalskyi on 19.02.2016.
@@ -19,11 +20,12 @@ public class AdditionalInfoProcessor {
 
     public Object process(Map<String, Object> event) {
         AdditionInfo original = null;
+        info(this, "START " + event.get("id").toString());
         if (event.containsKey("info")) {
-            info(this, "Event has Info");
+            info(this, "!!!! Event has Info");
             original = JsonHelper.getMapper().convertValue(event.get("info"), AdditionInfo.class);
         } else {
-            info(this, "No info");
+            info(this, "!!!! No info");
             original = new AdditionInfo();
         }
 
@@ -68,6 +70,10 @@ public class AdditionalInfoProcessor {
         return merged;
     }
 
+
+
+
+
     private AdditionInfo getAdditionalInfo(Map<String, Object> event, AdditionInfo original) {
         String eventName = (String) event.get("name");
         String eventUrl = (String) event.get("eventUrl");
@@ -83,12 +89,15 @@ public class AdditionalInfoProcessor {
         }
         */
         if (original.flickrImages == null || original.flickrImages.isEmpty()) {
+            try {
             info(this, "call Flickr");
             Set<String> flickrImages = flickrProcessor.fetchImages(eventName);
             if (!flickrImages.isEmpty()) {
                 info.setFlickrImages(flickrImages);
             }
+            } catch (Exception e) {}
         }
+        /*
         if (original.wikiAttractions == null || original.wikiAttractions.isEmpty()) {
             info(this, "call WIKI Attraction processor");
             Map<String, String> newWikiAttractions = wikiProcessor.fetchAttractionInfo(attractions);
@@ -96,6 +105,8 @@ public class AdditionalInfoProcessor {
                 info.setWikiAttractions(newWikiAttractions);
             }
         }
+        */
+        /*
         if (original.wikiVenues == null || original.wikiVenues.isEmpty()) {
             info(this, "call WIKI Venues processor");
             Map<String, String> newWikiVenues = wikiProcessor.fetchVenuesInfo(venues);
@@ -103,15 +114,19 @@ public class AdditionalInfoProcessor {
                 info.setWikiVenues(newWikiVenues);
             }
         }
+        */
         if (original.attractions == null || original.attractions.isEmpty()) {
-            info(this, "call TM processor");
-            Set<TMProcessor.ArtistInfo> newAttractions = tmProcessor.fetchAttractionInfo(attractions);
-            if (!newAttractions.isEmpty()) {
-                info.setAttractions(newAttractions);
-            }
+            try {
+                info(this, "call TM processor");
+                Set<TMProcessor.ArtistInfo> newAttractions = tmProcessor.fetchAttractionInfo(attractions);
+                if (!newAttractions.isEmpty()) {
+                    info.setAttractions(newAttractions);
+                }
+            } catch (Exception e) {}
         }
 
-        if (original.getUniversePage() == null) {
+        if (original.getUniversePage() == null && eventUrl != null) {
+            try {
             info(this, "call Content processor");
             Optional<ContentProcessor.ParseResult> result = contentProcessor.fetchContent(eventUrl);
             result.map(pr -> {
@@ -121,6 +136,10 @@ public class AdditionalInfoProcessor {
                 info.setUniversePage(page);
                 return "";
             });
+            } catch (Exception e) {
+                info(this, e.getMessage());
+            }
+
         }
 
         return info;
@@ -225,7 +244,9 @@ public class AdditionalInfoProcessor {
         }
 
         public void setDescription(String description) {
-            this.description = description;
+
+                this.description = description;
+
         }
 
         public Set<String> getImages() {

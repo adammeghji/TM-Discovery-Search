@@ -9,6 +9,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.util.CancellableThreads;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -25,6 +26,8 @@ import static com.epam.search.common.LoggingUtil.info;
  */
 public class GrabberServiceImpl extends ElasticService implements GrabberService {
     private volatile int count = 0;
+    private volatile int errors = 0;
+
 
     private List<SearchService.SingleSearchResult> getAllEvents2() throws Exception {
         long eventAmount = getEventCount();
@@ -102,9 +105,15 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     }
 
     private void processEvents(List<SearchService.SingleSearchResult> events) throws Exception {
-        events.parallelStream().forEach(singleSearchResult -> {
-            Object event = processEvent(singleSearchResult.getSource());
-            insertSingleEvent(JsonHelper.toJson(event, false), singleSearchResult.getId());
+        events.stream().parallel().forEach(singleSearchResult -> {
+
+            try {
+                Object event = processEvent(singleSearchResult.getSource());
+                insertSingleEvent(JsonHelper.toJson(event, false), singleSearchResult.getId());
+            } catch (Exception e) {
+                errors++;
+                info(this, "ERRORS " + errors);
+            }
             count++;
             info(this, "Grabbed info for " + count + " events");
         });
@@ -132,6 +141,10 @@ public class GrabberServiceImpl extends ElasticService implements GrabberService
     public void grab(int from, int to) {
         tryable(() -> {
             List<SearchService.SingleSearchResult> events = getAllEvents(from, to);
+            info(this,"======");
+            info(this,"====");
+            info(this,"==");
+            info(this,".");
             info(this, "Trying to process " + events.size() + " events from # " + from + " to #" + to);
             processEvents(events);
         });

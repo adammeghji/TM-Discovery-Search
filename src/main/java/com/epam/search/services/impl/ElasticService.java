@@ -27,6 +27,7 @@ public abstract class ElasticService {
     protected void insertSingleEvent(String eventJson, String id) {
         TransportClient client = createClient();
         info(this, "Inserts : " + eventJson);
+        info(this, "FINISH " + id);
         IndexResponse response = client.prepareIndex(Config.INDEX_NAME, Config.EVENT_TYPE)
                 .setSource(eventJson)
                 .setId(id)

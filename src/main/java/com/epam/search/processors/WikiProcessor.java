@@ -38,9 +38,9 @@ public class WikiProcessor {
         attractions.forEach(a -> {
             String name = (String) ((Map<String, Object>) a).get("name");
             String info = fetchInfo(name);
-            if (!isBlank(info))
+            if (isBlank(info))
                 info = "NO CONTENT";
-            result.put(name, info);
+            result.put((String) ((Map<String, Object>) a).get("id"), info);
         });
         return result;
     }
