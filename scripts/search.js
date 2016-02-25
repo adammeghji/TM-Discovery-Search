@@ -149,12 +149,21 @@
                 }
             }
             else if (splitted.length > 1){
+                if (splitted[0]==="_all") {
+                    EPAM_data_match[splitted[0]] = {
+                    "query": splitted[1],
+                    "operator": "and",
+                    "fuzziness": 2,
+                    "analyzer" : "my_synonyms"
+                };
+                } else {
                 EPAM_data_match[splitted[0]] = {
                     "query": splitted[1],
                     "operator": "or",
                     "fuzziness": 2,
                     "analyzer" : "my_synonyms"
                 };
+                }
             }
             EPAM_data = {
                 "from" : from ? from : 0,
