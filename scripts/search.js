@@ -155,11 +155,13 @@
             {phrase : "this week", type: RANGE_TIME},
             {phrase : "this month", type: RANGE_TIME},
             {phrase : "next month", type: RANGE_TIME},
-            {phrase : "near me", type: LOCATION}
+            {phrase : "near me", type: LOCATION},
+            {phrase : "in los angeles", type: LOCATION, city : { latitude:34.052235, longitude: -118.243683 }},
+            {phrase : "san francisco", type: LOCATION, city : { latitude:37.7749, longitude: -122.4194 }},
+            {phrase : "new york", type: LOCATION, city : { latitude:40.7142700, longitude: -74.0059700 }}
         ];
 
         function findSpecialMatch(keyword) {
-            //var matched = [];
             for(var i in specialWords){
                 if(keyword.includes(specialWords[i].phrase))
                    return specialWords[i];
@@ -234,8 +236,8 @@
                               "_all": {
                                 "query": query,
                                 "operator": "or",
-                                "fuzziness": 2
-//                                "analyzer": "my_synonyms2"
+                                "fuzziness": 2,
+                                "analyzer": "my_synonyms"
                               }
                          },
                         "filter": {
@@ -253,12 +255,44 @@
             return request;
         }
 
+        function buildCityRequest(special, dataMatch, from) {
+            var query = dataMatch.name.query.toLowerCase().replace(special.phrase, "").trim();
+            var request = {
+                "from" : from ? from : 0,
+                "size" : 20,
+                "query": {
+                    "filtered": {
+                        "query" : {
+                         "match": {
+                              "_all": {
+                                "query": query,
+                                "operator": "or",
+                                "fuzziness": 2,
+                                "analyzer": "my_synonyms"
+                              }
+                         },
+                        "filter": {
+                          "geo_distance": {
+                            "distance": "100km",
+                            "location": {
+                              "lat": special.city.latitude,
+                              "lon": special.city.longitude
+                            }
+                          }
+                        }
+                    }}
+                }
+            };
+            return request;
+        }
         function buildLocationRequest(special, dataMatch, from) {
             var request;
             switch(special.phrase) {
                 case "near me":
                     request = buildNearMeRequest(special, dataMatch, from);
                     break;
+                default:
+                    request = buildCityRequest(special, dataMatch, from)
             }
             return request;
         }
