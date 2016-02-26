@@ -627,8 +627,43 @@
                 var flickrImagesCard = getEventsFlickrImagesCard(array);
                 if(flickrImagesCard) columnRight.append(flickrImagesCard);
 
+                if(array.length){
+                    var rawAttractionList = [],
+                        attractionList = [];
+                    for (var item in array){
+                        try {
+                            var attractions = array[item]['_source']['_embedded']['attractions'];
+                            if(_.isArray(attractions))
+                                rawAttractionList = _.concat(rawAttractionList, attractions)
+                        }
+                        catch (err){
+                            console.log(err);
+                        }
+                    }
 
-                if(array.length) {
+                    
+                    for(var item in rawAttractionList){
+                        try {
+                        if(rawAttractionList[item].image.url && rawAttractionList[item].name)
+                            attractionList.push({url: rawAttractionList[item].image.url, name: rawAttractionList[item].name});
+                        }
+                        catch (e) {
+                            console.log("!!!!!!!!! "+e.message);
+                        }
+                        
+                    }
+
+                    attractionList = _.filter(attractionList, function(_obj){
+                        return _obj.url && _obj.name
+                    });
+
+                    attractionList = _.uniqBy(attractionList, 'url');
+                    attractionList = _.slice(attractionList, [start = 0], [end = 2]);
+                    self.initAttractionsCard(columnRight, attractionList, true);
+
+
+
+                    // Calendar
                     var eventList = [],
                         startDates = [];
                     try {
@@ -669,43 +704,8 @@
                     }catch (err){
                         console.log(err);
                     }
-                }
+                    // End calendar
 
-
-
-                if(array.length){
-                    var rawAttractionList = [],
-                        attractionList = [];
-                    for (var item in array){
-                        try {
-                            var attractions = array[item]['_source']['_embedded']['attractions'];
-                            if(_.isArray(attractions))
-                                rawAttractionList = _.concat(rawAttractionList, attractions)
-                        }
-                        catch (err){
-                            console.log(err);
-                        }
-                    }
-
-                    
-                    for(var item in rawAttractionList){
-                        try {
-                        if(rawAttractionList[item].image.url && rawAttractionList[item].name)
-                            attractionList.push({url: rawAttractionList[item].image.url, name: rawAttractionList[item].name});
-                        }
-                        catch (e) {
-                            console.log("!!!!!!!!! "+e.message);
-                        }
-                        
-                    }
-
-                    attractionList = _.filter(attractionList, function(_obj){
-                        return _obj.url && _obj.name
-                    });
-
-                    attractionList = _.uniqBy(attractionList, 'url');
-                    attractionList = _.slice(attractionList, [start = 0], [end = 2]);
-                    self.initAttractionsCard(columnRight, attractionList, true);
 
                     columnRight.append('<div id="js_google_map" class="google_map"></div>');  // append Google maps
                 }
@@ -854,6 +854,26 @@
 
                         responseDetailContainer.append('<div class="clearfix"></div>');
 
+
+                        // Video
+
+                        if(itemInfo.videos){
+                            if(itemInfo.videos[0].ids){
+                                if(itemInfo.videos[0].ids[0]) {
+                                    var src = 'http://www.youtube.com/embed/' + itemInfo.videos[0].ids[0],
+                                        video = '<iframe id="ytplayer" type="text/html" width="100%" height="262" src="' + src + '" frameborder="0"/>';
+
+                                    responseDetailContainer.append(video);
+
+
+
+                                    console.log(itemInfo.videos[0].ids[0]);
+                                }
+                            }
+                        }
+
+
+
                         // Universe page
                         if(itemInfo.universePage){
                             if(itemInfo.universePage.description || itemInfo.universePage.images){
@@ -873,7 +893,7 @@
                             try {
                             if(itemAttractions[item].image.url && itemAttractions[item].name)
                                 attractionList.push({url: itemAttractions[item].image.url, name: itemAttractions[item].name});
-                            } catch (e) {console.log("!!!!!!!!!"+e.message);}
+                            } catch (e) {console.log(e.message);}
                         }
 
                         attractionList = _.filter(attractionList, function(_obj){
@@ -884,7 +904,23 @@
                         attractionList = _.slice(attractionList, [start = 0], [end = 2]);
                         self.initAttractionsCard(responseDetailContainer, attractionList, true);
 
-                        // Venues
+
+                        // Biography
+                        if(itemInfo.attractions){
+                            if(itemInfo.attractions[0]){
+                                if(itemInfo.attractions[0].biography){
+                                    var biographyText = $.truncate(itemInfo.attractions[0].biography, {
+                                        length: truncateLimit
+                                    });
+
+                                    var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h4>Biography</h4>");
+                                    responseDetailContainer.append($card);
+                                }
+                            }
+                        }
+
+
+                        // Venue images
                         if(_.isObject(itemInfo)){
                             if(_.isArray(itemInfo.venues)){
                                 if(itemInfo.venues.length){
@@ -910,19 +946,6 @@
                             self.initMap('js_google_map', center, 6, [center]);
                         }
 
-                        // Biography
-                        if(itemInfo.attractions){
-                            if(itemInfo.attractions[0]){
-                                if(itemInfo.attractions[0].biography){
-                                    var biographyText = $.truncate(itemInfo.attractions[0].biography, {
-                                        length: truncateLimit
-                                    });
-
-                                    var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h4>Biography</h4>");
-                                    responseDetailContainer.append($card);
-                                }
-                            }
-                        }
 
                     }
 
