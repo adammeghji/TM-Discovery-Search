@@ -129,6 +129,119 @@
                 new Column(json, '_embedded.events', url, false);
             });
         };
+        var LOCATION = 1;
+        var TIME = 2;
+        var RANGE_TIME = 3;
+        var now = moment();
+        var specialWords = [
+            {phrase : "today", type: TIME, date: now},
+            {phrase : "tomorrow", type: TIME, date: now.add(1, 'days')},
+            {phrase : "next week", type: RANGE_TIME},
+            {phrase : "this week", type: RANGE_TIME},
+            {phrase : "this month", type: RANGE_TIME},
+            {phrase : "next month", type: RANGE_TIME},
+            {phrase : "near me", type: LOCATION}
+//            {phrase = "in ", type: LOCATION},
+        ];
+
+        function findSpecialMatch(keyword) {
+            //var matched = [];
+            for(var i in specialWords){
+                if(keyword.includes(specialWords[i].phrase))
+                   return specialWords[i];
+            }
+        }
+
+        function getTimeRequest(dataMatch, from, ranges){
+            return  {
+                "from" : from ? from : 0,
+                "size" : 20,
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": dataMatch
+                            }
+                        ],
+                        "filter": {
+                            "range": {
+                              "dates.start.localDate": ranges
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        function buildTimeRequest(date, dataMatch, from) {
+            var ranges = {
+                "gte": date.format("YYYY-MM-DD"),
+                "lte": date.format("YYYY-MM-DD")
+            };
+            return getTimeRequest(dataMatch, from, ranges);
+        }
+
+        function buildTimeRangeRequest(special, dataMatch, from) {
+            var startDate, endDate;
+            switch(special.phrase) {
+                case "this week":
+                    startDate = moment().startOf('week');
+                    endDate = moment().endOf('week');
+                    break;
+                case "next week":
+                    startDate = moment().add(1, 'weeks').startOf('week')
+                    endDate = moment().add(1, 'weeks').endOf('week')
+                    break;
+                case "this month":
+                    startDate = moment().startOf('month');
+                    endDate = moment().endOf('month');
+                    break;
+                case "next month":
+                    startDate = moment().add(1, 'month').startOf('month')
+                    endDate = moment().add(1, 'month').endOf('month')
+                    break;
+            }
+            var ranges = {
+                "gte": startDate.format("YYYY-MM-DD"),
+                "lte": endDate.format("YYYY-MM-DD")
+            };
+            return getTimeRequest(dataMatch, from, ranges);
+        }
+
+        function buildNearMeRequest(special, dataMatch, from) {
+            //navigator.geolocation.getCurrentPosition(success, error, )
+        }
+
+        function buildLocationRequest(special, dataMatch, from) {
+            var request;
+            switch(special.phrase) {
+                case "near me":
+                    request = buildNearMeRequest(special, dataMatch, from);
+                    break;
+            }
+            return request;
+        }
+
+        function getSpecial(keyword, dataMatch, from ) {
+            var req = keyword.toLowerCase();
+            var matched = findSpecialMatch(req);
+            if(!matched)
+                return;
+            var result;
+            dataMatch.name.query = dataMatch.name.query.toLowerCase().replace(matched.phrase, "").trim();
+            switch(matched.type) {
+                case TIME:
+                    result = buildTimeRequest(matched.date, dataMatch, from);
+                    break;
+                case RANGE_TIME:
+                    result = buildTimeRangeRequest(matched, dataMatch, from);
+                    break;
+                case LOCATION:
+                    result = buildLocationRequest(matched, dataMatch, from);
+                    break;
+            }
+            return result;
+        }
 
         // runs EPAM request
         var runEPAMRequest = function(from){
@@ -151,8 +264,6 @@
                 }
             }
 
-            
-            
             if (splitted.length === 1){
                 EPAM_data_match = {
                     "name": {
@@ -180,33 +291,10 @@
                 };
                 }
             }
-            
-            
-            if (isNW) {
-                EPAM_data = {
-                    "from" : from ? from : 0,
-                    "size" : 20,
-                    "query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "match": EPAM_data_match
-                                }
-                            ],
-                            "filter": {
-                                "range": {
-                                  "dates.start.dateTime": {
-                                    "gte": "2016-02-28",
-                                    "lte": "2016-03-05"
-                                  }
-                                }
-                              }
-                        }
-                    }
-                };
-                
-                
-                
+
+            var specialRequest = getSpecial(keyword, EPAM_data_match, from );
+            if(specialRequest){
+               EPAM_data = specialRequest;
             } else {
                 EPAM_data = {
                     "from" : from ? from : 0,
@@ -222,9 +310,6 @@
                     }
                 };
             }
-            
-            
-
             sendRequest(url, 'POST', EPAM_data, function(json){
                 //new Column(json, 'hits.hits', url, true, from ? from : 0);
                 new ColumnEpam(json, 'hits.hits', url, true, from ? from : 0);
@@ -777,8 +862,6 @@
                     if(json.hits && json.hits.hits && json.hits.hits.length > 0) {
                         var result = [];
                         for(var i in json.hits.hits) {
-//                            if(json.hits.hits[i].fields && json.hits.hits[i].fields.name && json.hits.hits[i].fields.name[0])
-//                                result.push(json.hits.hits[i].fields.name[0]);
                                 if(json.hits.hits[i]._source.name)
                                     result.push(json.hits.hits[i]._source.name);
                         }
