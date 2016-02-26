@@ -1,3 +1,14 @@
+a.list-group-item{
+    cursor: pointer;
+}
+
+.event_list_date {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    font-size: 0.8em;
+}
+
 #spinner {
     width: 100px;
     height: 100px;
@@ -210,6 +221,11 @@
     color: #000;
 }
 
+ /*Event card*/
+.event_text_card_footer {
+    padding: 5px 0;
+    color: #9A9292;
+}
 
 
 

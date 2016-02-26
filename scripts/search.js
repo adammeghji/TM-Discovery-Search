@@ -630,7 +630,7 @@
                             attractionList.push({url: rawAttractionList[item].image.url, name: rawAttractionList[item].name});
                         }
                         catch (e) {
-                            console.log("!!!!!!!!! "+e.message);
+                            console.log(e.message);
                         }
                         
                     }
@@ -701,18 +701,39 @@
 
 
                 for (var item in array){ // iterate through each item in array
-                    var listItem = $('<a class="list-group-item row js_left_list"></a>'), // item wrapper
+                    var embedded = array[item]['_source']['_embedded'],
+                        listItem = $('<a class="list-group-item row js_left_list" htef="#"></a>'), // item wrapper
                         leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
-                        name = $('<div>' + '<b>name: </b>' + array[item]['_source']['name'] + '</div>'), // item name
-                        id = $('<div id="id">' + '<b>id : </b>' +  array[item]['_source']['id']  + '</div>'), // item id
-
+                        //name = $('<div>' + '<b>Event name: </b>' + array[item]['_source']['name'] + '</div>'), // item name
+                        name = $('<div><b> ' + array[item]['_source']['name'] + ' </b></div>'), // item name
                         itemUrl = array[item]['_source']['eventUrl'] , // item URL
                         itemInfo = array[item]['_source']['info'] || 'undefined item' ; // item info from EPAM only
 
+                    leftColumn.append(name); // append name to wrapper left column
+
+                    try{
+                        var eventDate =  moment(array[item]['_source'].dates.start.dateTime).format("MM/DD/YYYY");
+                        leftColumn.append("<div class='event_list_date'>" + eventDate + "</div>");
+                    } catch (err){
+                        console.log(err);
+                    }
+
+                    if(embedded)
+                        if(embedded.venue[0]) {
+                            var venue = embedded.venue[0],
+                                address = '';
+
+                            if (venue.city)
+                                address = venue.city.name ? venue.city.name : '';
+
+                            if (venue.address)
+                                address = address + (venue.address.line1 ? (', ' + venue.address.line1) : '') + (venue.address.line1 ? (', ' + venue.address.line2) : '')
+
+                            leftColumn.append("<div>" + address + "</div>");
+                        }
+
+
                     listItem.data('id',array[item]['_source']['id'] );
-
-
-                    leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
                         leftColumn.append($('<a target="_blank" href="' + itemUrl + '"><b>Link to TM</b></div>'));
 
@@ -807,8 +828,8 @@
                         // Event card
                         var $eventTextCard = $("<div class='text_card'></div>"),
                             $eventTextCardBody = $('<div class="clearfix"></div>'),
-                            $eventTextCardFooter = $('<div class="clearfix"></div>');
-                        $eventTextCard.append("<h2>" + source.name + "</h2>");
+                            $eventTextCardFooter = $('<div class="clearfix event_text_card_footer"></div>');
+                        $eventTextCard.append("<h2 class='text-center'>" + source.name + "</h2>");
 
                         try {
                             if(itemInfo.universePage.description){
