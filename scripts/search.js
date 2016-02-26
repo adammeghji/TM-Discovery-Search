@@ -1,8 +1,8 @@
 (function(){
 
     var locationX = {
-        latitude: 34.052235,
-        longitude: -118.243683
+        latitude: 35.993246,
+        longitude: -78.904464
     };
 
     navigator.geolocation.getCurrentPosition(function(response){
@@ -158,6 +158,9 @@
             {phrase : "near me", type: LOCATION},
             {phrase : "in los angeles", type: LOCATION, city : { latitude:34.052235, longitude: -118.243683 }},
             {phrase : "in san francisco", type: LOCATION, city : { latitude:37.7749, longitude: -122.4194 }},
+            {phrase : "in durham", type: LOCATION, city : { latitude:35.993246, longitude: -78.904464 }},
+            {phrase : "in las vegas", type: LOCATION, city : { latitude:36.169941, longitude: -115.139830 }},
+            {phrase : "in washington", type: LOCATION, city : { latitude:38.907192, longitude: -77.036871 }},
             {phrase : "in new york", type: LOCATION, city : { latitude:40.7142700, longitude: -74.0059700 }}
         ];
 
