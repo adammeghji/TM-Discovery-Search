@@ -768,15 +768,22 @@
                 self.topSmallImg = $('<div class="img"><img src="">' + 'page ' + (self.page + 1) + ' of ' + (self.totalPages + (isEPAM ? 1 : 0)) + '</div>'); // display current page of total
             };
 
-            self.initAttractionsCard = function($appendTo, attractions, addSource){
+            self.initAttractionsCard = function($appendTo, attractions, addSource, labelLimit){
                 var source = 'http://s1.ticketm.net/tm/en-us',
                     $card = $("<div class='attraction_card attraction_card-" + attractions.length + "'></div>");
+                labelLimit = labelLimit || 110;
+                labelLimit = labelLimit / attractions.length ;
+
                 for(var i in attractions){
                     var url = addSource ? source + attractions[i].url : attractions[i].url,
                         $cardItem = $("<div class='attraction_card__item'></div>");
 
-                    if(attractions[i].name)
-                        $cardItem.append("<div class='card_label'>" + attractions[i].name + "</div>");
+                    if(attractions[i].name){
+                        var labelText = $.truncate(attractions[i].name, {
+                            length: labelLimit
+                        });
+                        $cardItem.append("<div class='card_label'>" + labelText + "</div>");
+                    }
 
                     if(url) $cardItem.css({backgroundImage: 'url(' + url +')'});
                     $card.append($cardItem);
