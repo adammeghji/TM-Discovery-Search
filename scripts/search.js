@@ -811,14 +811,14 @@
                 return map;
             };
 
-            self.renderCardDetail = function(responseDetailContainer , idDetail){
+            self.renderCardDetail = function(responseContentBox , idDetail){
                 var eventPicHost = 'http://s1.ticketm.net/tm/en-us/';
                 var array = Object.byString(json, pathToArray), // get array of items
                 /*details column*/
                     cardSingleRight = $('<div class="list-group-item row"></div>'),
                     titleCard = $('<a class="list-group-item active">Single card details</a>'); // column header
 
-                //responseDetailContainer.append(titleCard);
+                //responseContentBox.append(titleCard);
                 for (var item in array){
                     var source = array[item]['_source'],
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
@@ -871,20 +871,20 @@
                         } catch (e) {console.log(e.message);}
 
                         $eventTextCard.append($eventTextCardFooter);
-                        responseDetailContainer.append($eventTextCard);
+                        responseContentBox.append($eventTextCard);
                         // End event card
 
 
                         if (itemInfo.flickrImages) { // apend img if it exist
-                            responseDetailContainer.append($('<div class="col-xs-6 double-height"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"><span></span></div>'));
+                            responseContentBox.append($('<div class="col-xs-6 double-height"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"><span></span></div>'));
 
                             for(var i=1; i<itemInfo.length, i<3; i++){
                                 if(!itemInfo.flickrImages[i]) continue;
-                                responseDetailContainer.append($('<div class="crop-image-flick col-xs-6"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
+                                responseContentBox.append($('<div class="crop-image-flick col-xs-6"><img src="'+itemInfo.flickrImages[i]+'" class="img-responsive"></div>'));
                             }
                         }
 
-                        responseDetailContainer.append('<div class="clearfix"></div>');
+                        responseContentBox.append('<div class="clearfix"></div>');
 
 
                         // Video
@@ -895,7 +895,7 @@
                                     var src = 'http://www.youtube.com/embed/' + itemInfo.videos[0].ids[0],
                                         video = '<iframe id="ytplayer" type="text/html" width="100%" height="262" src="' + src + '" frameborder="0"/>';
 
-                                    responseDetailContainer.append(video);
+                                    responseContentBox.append(video);
                                 }
                             }
                         }
@@ -910,7 +910,7 @@
                                         url: itemInfo.universePage.images[0]
                                     }
                                 ];
-                                self.initAttractionsCard(responseDetailContainer, universe, false);
+                                self.initAttractionsCard(responseContentBox, universe, false);
                             }
                             console.log(itemInfo.universePage);
                         }
@@ -929,7 +929,7 @@
 
                         attractionList = _.uniqBy(attractionList, 'url');
                         attractionList = _.slice(attractionList, [start = 0], [end = 2]);
-                        self.initAttractionsCard(responseDetailContainer, attractionList, true);
+                        self.initAttractionsCard(responseContentBox, attractionList, true);
 
 
                         // Biography
@@ -941,7 +941,7 @@
                                     });
 
                                     var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h2>Biography</h2>");
-                                    responseDetailContainer.append($card);
+                                    responseContentBox.append($card);
                                 }
                             }
                         }
@@ -957,15 +957,15 @@
                                             url: itemInfo.venues[0].image
                                         }
                                     ];
-                                    self.initAttractionsCard(responseDetailContainer, venue, false);
+                                    self.initAttractionsCard(responseContentBox, venue, false);
                                 }
                             }
                         }
 
                         // Map
                         if(_.isObject(source.location)){
-                            responseDetailContainer.append('<div class="clearfix"></div>');
-                            responseDetailContainer.append('<div id="js_google_map" class="google_map"></div>');
+                            responseContentBox.append('<div class="clearfix"></div>');
+                            responseContentBox.append('<div id="js_google_map" class="google_map"></div>');
                             var center = {
                                 lat: source.location.lat,
                                 lng: source.location.lon
@@ -983,7 +983,7 @@
                                         });
 
                                         var $venueTextCard = $("<div class='text_card'></div>").html(venueText).prepend("<h2>" + itemInfo.venues[0].name + "</h2>");
-                                        responseDetailContainer.append($venueTextCard);
+                                        responseContentBox.append($venueTextCard);
 
                                     }
                                 }
@@ -994,7 +994,6 @@
                     }
 
                 }
-                responseDetailContainer.append($('<hr>'));
             };
             self.setListeners = function(){
                 self.previousPage.on('click', function(e){ // previous button click listener
@@ -1017,10 +1016,12 @@
                     me.addClass('active');
 
                     responseDetailContainer.fadeOut(200, function() {
-                        $(this).empty().show();
+
+                        var responseContentBox = responseDetailContainer.find('.list-group-item').empty();
+                        responseDetailContainer.show();
                         responseDetailContainer.fadeIn("slow");
 
-                        self.renderCardDetail(responseDetailContainer, idDetail);
+                        self.renderCardDetail(responseContentBox, idDetail);
                     });
                 });
             };
