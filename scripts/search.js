@@ -1,5 +1,20 @@
 (function(){
 
+    var locationX = {
+        latitude: 0,
+        longitude: 0
+    };
+
+    navigator.geolocation.getCurrentPosition(function(response){
+        console.log(response);
+        locationX.latitude = response.coords.latitude;
+        locationX.longitude = response.coords.longitude;
+
+        console.log(locationX);
+    }, function(){
+        console.log("Can't define geolocation");
+    } );
+
     Object.byString = function(o, s) { // prototype function to return sub object from object by string path
         s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
         s = s.replace(/^\./, ''); // strip a leading dot
@@ -706,7 +721,7 @@
             self.initMap = function(selectorId, center, zoom, markers){
                 var map = new google.maps.Map(document.getElementById(selectorId), {
                     center: center,
-                    zoom: 3
+                    zoom: zoom
                 });
 
                 for (var i in markers){
@@ -735,11 +750,39 @@
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
                         itemAttractions = isEPAM ? source['_embedded']['attractions'] : 'not used in TM', //override item URL
                         attractionList = [],
-                        itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+                        itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM', // item info from EPAM only
+                        truncateLimit = 1200;
 
                     //render cardSingleRight
                     if(idList === idDetail) {
-                        console.log('fount id in list', idList , idDetail , itemAttractions);
+
+
+                        var $eventTextCard = $("<div class='text_card'></div>"),
+                            $eventTextCardBody = $('<div class="clearfix"></div>'),
+                            $eventTextCardFooter = $('<div class="clearfix"></div>');
+                        $eventTextCard.append("<h2>" + source.name + "</h2>");
+
+                        try {
+                            if(itemInfo.universePage.description){
+                                var eventText = $.truncate(itemInfo.universePage.description, {
+                                    length: truncateLimit
+                                });
+
+                                $eventTextCardBody.html(eventText);
+                                $eventTextCard.append($eventTextCardBody);
+                            }
+                        } catch (e) {console.log(e.message);}
+
+                        try {
+                            var eventDate =  moment(source.dates.start.dateTime).format("MM/DD/YYYY");
+                            $eventTextCardFooter.append("<div class='pull-left'>" + eventDate + "</div>");
+                        } catch (e) {console.log(e.message);}
+                        $eventTextCard.append($eventTextCardFooter);
+
+                        responseDetailContainer.append($eventTextCard);
+
+
+
                         if (itemInfo.flickrImages) { // apend img if it exist
                             responseDetailContainer.append($('<div class="col-xs-6 double-height"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"><span></span></div>'));
 
@@ -804,14 +847,18 @@
                                 lat: source.location.lat,
                                 lng: source.location.lon
                             };
-                            self.initMap('js_google_map', center, 2, [center]);
+                            self.initMap('js_google_map', center, 6, [center]);
                         }
 
                         // Biography
                         if(itemInfo.attractions){
                             if(itemInfo.attractions[0]){
                                 if(itemInfo.attractions[0].biography){
-                                    var $card = $("<div class='text_card'></div>").html(itemInfo.attractions[0].biography).prepend("<h4>Biography</h4>");
+                                    var biographyText = $.truncate(itemInfo.attractions[0].biography, {
+                                        length: truncateLimit
+                                    });
+
+                                    var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h4>Biography</h4>");
                                     responseDetailContainer.append($card);
                                 }
                             }
