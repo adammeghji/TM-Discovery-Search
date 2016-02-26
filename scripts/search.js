@@ -55,11 +55,17 @@
             if (getApproach() === "TM") {
                 responseContainer.removeClass("col-xs-6").addClass("col-xs-12"); //show right column
                 responseDetailContainer.hide(); //hide right column
+
+                $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
+                    console.log('Selection: ' + suggestion);
+                });
+
                 runTMRequest(); // run TM request
             }else{
                 responseContainer.addClass("col-xs-6").removeClass("col-xs-12"); //show right column
                 responseDetailContainer.show(); //show right column
                 runEPAMRequest(); // run EPAM request
+                autoCompleteRunner();
             }
         });
 
@@ -158,12 +164,21 @@
                 }
             }
             else if (splitted.length > 1){
+                if (splitted[0]==="_all") {
+                    EPAM_data_match[splitted[0]] = {
+                    "query": splitted[1],
+                    "operator": "and",
+                    "fuzziness": 2,
+                    "analyzer" : "my_synonyms"
+                };
+                } else {
                 EPAM_data_match[splitted[0]] = {
                     "query": splitted[1],
                     "operator": "or",
                     "fuzziness": 2,
                     "analyzer" : "my_synonyms"
                 };
+                }
             }
             
             
@@ -502,14 +517,18 @@
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
                 }
+
+                console.log(self.page, self.totalPages);
+
                 self.previousPage = $('<a href="#" id="prev-page"' + (self.page <= 0 ? ('class="disabled"') : '') +  '></a>'); // previous page button
-                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - (isEPAM ? 0 : 1)) ? ('class="disabled"') : '') +  '></a>'); // next page button
-                self.paging = $('<p id="paging">' + 'page ' + (self.page/20) + ' of ' + ( Math.floor(parseInt(self.totalPages)/20) ) + '</p>'); // display current page of total
+                self.nextPage = $('<a href="#" id="next-page"' + (self.page >= (self.totalPages - 20 ) ? ('class="disabled"') : '') +  '></a>'); // next page button
+                self.paging = $('<p id="paging">' + 'page ' + ((self.page/20) + 1) + ' of ' + (( Math.floor(parseInt(self.totalPages)/20) )  + 1) + '</p>'); // display current page of total
                 responseContainer.append(column);
                 /*right column*/
 
                 responseDetailContainer.empty(); // remove any previous columns
 
+                console.log(self.totalPages, 'self.totalPages');
                 if(self.totalPages > 0) {
                     responseContainer.append(self.previousPage).append(self.nextPage).append(self.paging); // append all three bottom to column
                     responseDetailContainer.append(columnRight);
@@ -527,7 +546,9 @@
                     var url = addSource ? source + attractions[i].url : attractions[i].url,
                         $cardItem = $("<div class='attraction_card__item'></div>");
 
-                    if(attractions[i].name) $cardItem.text(attractions[i].name);
+                    if(attractions[i].name)
+                        $cardItem.append("<div class='card_label'>" + attractions[i].name + "</div>");
+
                     if(url) $cardItem.css({backgroundImage: 'url(' + url +')'});
                     $card.append($cardItem);
                 }
@@ -582,7 +603,7 @@
                             }
                         }
 
-                        responseDetailContainer.append('<div class="clearfix" style="margin-bottom: 20px;"></div>');
+                        responseDetailContainer.append('<div class="clearfix"></div>');
 
                         // Universe page
                         if(itemInfo.universePage){
@@ -640,6 +661,16 @@
                             self.initMap('js_google_map', center, 2, [center]);
                         }
 
+                        // Biography
+                        if(itemInfo.attractions){
+                            if(itemInfo.attractions[0]){
+                                if(itemInfo.attractions[0].biography){
+                                    var $card = $("<div class='text_card'></div>").html(itemInfo.attractions[0].biography).prepend("<h4>Biography</h4>");
+                                    responseDetailContainer.append($card);
+                                }
+                            }
+                        }
+
                     }
 
                 }
@@ -656,12 +687,14 @@
                 });
                 $('.js_left_list').on('click', function(e){ // list-group-item listener
                     var responseDetailContainer = $('#response-detail'),
+                        responseContainer = $('#response .list-group-item'),
                         me = $(this),
                         idDetail = $(this).data('id');
 
                     e.preventDefault();
-                    console.log(me);
-                    me.toggleClass('active');
+                    //console.log(me);
+                    responseContainer.removeClass('active');
+                    me.addClass('active');
 
                     responseDetailContainer.fadeOut(200, function() {
                         $(this).empty().show();
@@ -700,6 +733,81 @@
             self.initGroupEventsMap();
             self.setListeners();
         };
+
+        function uniques(arr) {
+            var a = [];
+            for (var i=0, l=arr.length; i<l; i++)
+                if (a.indexOf(arr[i]) === -1 && arr[i] !== '')
+                    a.push(arr[i]);
+            return a;
+        }
+
+        function load(query, cb) {
+            var request = '{ "fields" : ["name"], "size":300, "query" :{ "match_phrase_prefix" : { "name":"' + query + '"}}}';
+            sendRequest(search_keyword_EPAM_url, 'GET', request, function(json){
+                if(json.hits && json.hits.hits && json.hits.hits.length > 0) {
+                    var result = [];
+                    for(var i in json.hits.hits) {
+                        result.push(json.hits.hits[0]._source.name);
+                    }
+                    result = uniques(result);
+                    cb(result);
+                }
+            });
+        }
+
+        var eventMatcher = function() {
+            if (getApproach()==='TM'){
+                $('.twitter-typeahead').css("display","block");
+                return;
+            }
+
+            return function findMatches(q, cb) {
+                var EPAM_data = {
+                    "size" : 50,
+                    "query": {
+                        "match_phrase_prefix": {
+                            "name": {
+                                "query" : q
+                            }
+                        }
+                    }
+                };
+                sendRequest(search_keyword_EPAM_url, 'POST', EPAM_data, function(json){
+                    if(json.hits && json.hits.hits && json.hits.hits.length > 0) {
+                        var result = [];
+                        for(var i in json.hits.hits) {
+//                            if(json.hits.hits[i].fields && json.hits.hits[i].fields.name && json.hits.hits[i].fields.name[0])
+//                                result.push(json.hits.hits[i].fields.name[0]);
+                                if(json.hits.hits[i]._source.name)
+                                    result.push(json.hits.hits[i]._source.name);
+                        }
+                        //debugger
+                        result = uniques(result);
+
+                        cb(result);
+                    }
+                });
+            }
+        };
+
+        var autoCompleteRunner = function() {
+            if (getApproach() !== 'TM') {
+                console.log(getApproach());
+                $('#text-to-search').typeahead({
+                        hint: true,
+                        highlight: true,
+                        minLength: 1
+                    },
+                    {
+                        name: 'events',
+                        source: eventMatcher()
+                    });
+                $('.twitter-typeahead').css("display", "block");
+
+            }
+        }
+
 
     });
 

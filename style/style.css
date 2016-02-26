@@ -98,13 +98,11 @@
 /* Google maps */
 .google_map {
     height: 262px;
-    margin-bottom: 20px;
 }
 
 /* Flickr Card */
 .flickr_card {
     overflow: hidden;
-    margin-bottom: 20px;
 }
 
 .flickr_card__item {
@@ -154,22 +152,49 @@
     width: 100%;
     height: 262px;
     table-layout: fixed;
-    margin-bottom: 20px;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .attraction_card__item{
     display: table-cell;
     text-align: center;
-    vertical-align: middle;
+    vertical-align: bottom;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    color: #337ab7;
-    text-shadow: 1px 1px #000;
+    color: #000;
 }
 
+.card_label{
+    margin:0 20px 20px;
+    background-color: #fff;
+    padding: 8px;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
 
+/*autocomplete*/
+.tt-menu {
+    background-color: #ffffff;
+    padding: 0 20px;
+    border: 1px solid #f0f0f0;
+    width: 100%;
+}
+.tt-suggestion {
+    cursor: pointer;
+    margin: 10px 0;
+}
+.tt-suggestion:hover {
+    color: #337ab7;
+}
+/*autocomplete END*/
+
+/*text card*/
+.text_card {
+    font-size: 0.8em;
+}
 
 
 
