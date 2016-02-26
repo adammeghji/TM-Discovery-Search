@@ -650,11 +650,39 @@
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
                         itemAttractions = isEPAM ? source['_embedded']['attractions'] : 'not used in TM', //override item URL
                         attractionList = [],
-                        itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM'; // item info from EPAM only
+                        itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM', // item info from EPAM only
+                        truncateLimit = 1200;
 
                     //render cardSingleRight
                     if(idList === idDetail) {
-                        console.log('fount id in list', idList , idDetail , itemAttractions);
+
+
+                        var $eventTextCard = $("<div class='text_card'></div>"),
+                            $eventTextCardBody = $('<div class="clearfix"></div>'),
+                            $eventTextCardFooter = $('<div class="clearfix"></div>');
+                        $eventTextCard.append("<h2>" + source.name + "</h2>");
+
+                        try {
+                            if(itemInfo.universePage.description){
+                                var eventText = $.truncate(itemInfo.universePage.description, {
+                                    length: truncateLimit
+                                });
+
+                                $eventTextCardBody.html(eventText);
+                                $eventTextCard.append($eventTextCardBody);
+                            }
+                        } catch (e) {console.log(e.message);}
+
+                        try {
+                            var eventDate =  moment(source.dates.start.dateTime).format("MM/DD/YYYY");
+                            $eventTextCardFooter.append("<div class='pull-left'>" + eventDate + "</div>");
+                        } catch (e) {console.log(e.message);}
+                        $eventTextCard.append($eventTextCardFooter);
+
+                        responseDetailContainer.append($eventTextCard);
+
+
+
                         if (itemInfo.flickrImages) { // apend img if it exist
                             responseDetailContainer.append($('<div class="col-xs-6 double-height"><img src="'+itemInfo.flickrImages[0]+'" class="img-responsive"><span></span></div>'));
 
@@ -726,7 +754,11 @@
                         if(itemInfo.attractions){
                             if(itemInfo.attractions[0]){
                                 if(itemInfo.attractions[0].biography){
-                                    var $card = $("<div class='text_card'></div>").html(itemInfo.attractions[0].biography).prepend("<h4>Biography</h4>");
+                                    var biographyText = $.truncate(itemInfo.attractions[0].biography, {
+                                        length: truncateLimit
+                                    });
+
+                                    var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h4>Biography</h4>");
                                     responseDetailContainer.append($card);
                                 }
                             }
