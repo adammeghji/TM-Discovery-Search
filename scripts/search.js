@@ -7,8 +7,8 @@
 
     navigator.geolocation.getCurrentPosition(function(response){
         console.log(response);
-//        locationX.latitude = response.coords.latitude;
-//        locationX.longitude = response.coords.longitude;
+        locationX.latitude = response.coords.latitude;
+        locationX.longitude = response.coords.longitude;
 
         console.log(locationX);
     }, function(){
