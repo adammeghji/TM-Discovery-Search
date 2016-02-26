@@ -1,18 +1,18 @@
 (function(){
 
     var locationX = {
-        latitude: 0,
-        longitude: 0
+        latitude: 34.052235,
+        longitude: -118.243683
     };
 
     navigator.geolocation.getCurrentPosition(function(response){
         console.log(response);
-        locationX.latitude = response.coords.latitude;
-        locationX.longitude = response.coords.longitude;
+//        locationX.latitude = response.coords.latitude;
+//        locationX.longitude = response.coords.longitude;
 
         console.log(locationX);
     }, function(){
-        console.log("Can't define geolocation");
+        console.log("Can't define geolocation standard coordinates will be used : " + locationX);
     } );
 
     Object.byString = function(o, s) { // prototype function to return sub object from object by string path
@@ -156,7 +156,6 @@
             {phrase : "this month", type: RANGE_TIME},
             {phrase : "next month", type: RANGE_TIME},
             {phrase : "near me", type: LOCATION}
-//            {phrase = "in ", type: LOCATION},
         ];
 
         function findSpecialMatch(keyword) {
@@ -224,7 +223,34 @@
         }
 
         function buildNearMeRequest(special, dataMatch, from) {
-            //navigator.geolocation.getCurrentPosition(success, error, )
+            var query = dataMatch.name.query.toLowerCase().replace(special.phrase, "").trim();
+            var request = {
+                "from" : from ? from : 0,
+                "size" : 20,
+                "query": {
+                    "filtered": {
+                        "query" : {
+                         "match": {
+                              "_all": {
+                                "query": query,
+                                "operator": "or",
+                                "fuzziness": 2
+//                                "analyzer": "my_synonyms2"
+                              }
+                         },
+                        "filter": {
+                          "geo_distance": {
+                            "distance": "100km",
+                            "location": {
+                              "lat": locationX.latitude,
+                              "lon": locationX.longitude
+                            }
+                          }
+                        }
+                    }}
+                }
+            };
+            return request;
         }
 
         function buildLocationRequest(special, dataMatch, from) {
