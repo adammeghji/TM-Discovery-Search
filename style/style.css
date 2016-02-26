@@ -1,3 +1,33 @@
+.h1, .h2, .h3, h1, h2, h3 , .h4, .h5, .h6, h4, h5, h6{
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.h6, h6 {
+    font-size: 14px;
+}
+
+.h5, h5 {
+    font-size: 14px;
+}
+
+.h4, h4 {
+    font-size: 16px;
+}
+
+.h3, h3 {
+    font-size: 18px;
+}
+
+.h2, h2 {
+    font-size: 20px;
+}
+
+.h1, h1 {
+    font-size: 40px;
+}
+
+
 a.list-group-item{
     cursor: pointer;
 }
@@ -7,6 +37,10 @@ a.list-group-item{
     right: 0;
     bottom: 0;
     font-size: 0.8em;
+}
+
+.event_list_content{
+    padding-right: 45px;
 }
 
 #spinner {

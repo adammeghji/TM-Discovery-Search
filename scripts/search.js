@@ -705,18 +705,12 @@
                         listItem = $('<a class="list-group-item row js_left_list" htef="#"></a>'), // item wrapper
                         leftColumn = $('<div class="col-xs-12"></div>'), // wrapper left column
                         //name = $('<div>' + '<b>Event name: </b>' + array[item]['_source']['name'] + '</div>'), // item name
-                        name = $('<div><b> ' + array[item]['_source']['name'] + ' </b></div>'), // item name
+                        name = $('<div class="event_list_content"><b> ' + array[item]['_source']['name'] + ' </b></div>'), // item name
                         itemUrl = array[item]['_source']['eventUrl'] , // item URL
                         itemInfo = array[item]['_source']['info'] || 'undefined item' ; // item info from EPAM only
 
                     leftColumn.append(name); // append name to wrapper left column
 
-                    try{
-                        var eventDate =  moment(array[item]['_source'].dates.start.dateTime).format("MM/DD/YYYY");
-                        leftColumn.append("<div class='event_list_date'>" + eventDate + "</div>");
-                    } catch (err){
-                        console.log(err);
-                    }
 
                     if(embedded)
                         if(embedded.venue[0]) {
@@ -729,8 +723,15 @@
                             if (venue.address)
                                 address = address + (venue.address.line1 ? (', ' + venue.address.line1) : '') + (venue.address.line1 ? (', ' + venue.address.line2) : '')
 
-                            leftColumn.append("<div>" + address + "</div>");
+                            name.append("<div>" + address + "</div>");
                         }
+
+                    try{
+                        var eventDate =  moment(array[item]['_source'].dates.start.dateTime).format("MM/DD/YYYY");
+                        leftColumn.append("<div class='event_list_date'>" + eventDate + "</div>");
+                    } catch (err){
+                        console.log(err);
+                    }
 
 
                     listItem.data('id',array[item]['_source']['id'] );
@@ -740,8 +741,6 @@
                     if(itemInfo) {
                         itemInfoShow(itemInfo, leftColumn , columnRight, itemUrl);
                     };
-
-                    //columnRight.append('<hr/>');
 
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
@@ -836,7 +835,7 @@
                         var $eventTextCard = $("<div class='text_card'></div>"),
                             $eventTextCardBody = $('<div class="clearfix"></div>'),
                             $eventTextCardFooter = $('<div class="clearfix event_text_card_footer"></div>');
-                        $eventTextCard.append("<h2 class='text-center'>" + source.name + "</h2>");
+                        $eventTextCard.append("<h1 class='text-center'>" + source.name + "</h1>");
 
                         try {
                             if(itemInfo.universePage.description){
@@ -941,7 +940,7 @@
                                         length: truncateLimit
                                     });
 
-                                    var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h4>Biography</h4>");
+                                    var $card = $("<div class='text_card'></div>").html(biographyText).prepend("<h2>Biography</h2>");
                                     responseDetailContainer.append($card);
                                 }
                             }
@@ -973,6 +972,23 @@
                             };
                             self.initMap('js_google_map', center, 6, [center]);
                         }
+
+
+                        try {
+                            if(_.isObject(itemInfo)){
+                                if(_.isArray(itemInfo.venues)){
+                                    if(itemInfo.venues.length){
+                                        var venueText = $.truncate(itemInfo.venues[0].details, {
+                                            length: 300
+                                        });
+
+                                        var $venueTextCard = $("<div class='text_card'></div>").html(venueText).prepend("<h2>" + itemInfo.venues[0].name + "</h2>");
+                                        responseDetailContainer.append($venueTextCard);
+
+                                    }
+                                }
+                            }
+                        } catch (e) {console.log(e.message);}
 
 
                     }
