@@ -174,16 +174,16 @@
                 "size" : 20,
                 "query": {
                     "bool": {
-                        "should": [
+                        "must": [
                             {
                                 "match": dataMatch
+                            },
+                            {
+                               "range": {
+                                 "dates.start.localDate": ranges
+                               }
                             }
-                        ],
-                        "filter": {
-                            "range": {
-                              "dates.start.localDate": ranges
-                            }
-                        }
+                        ]
                     }
                 }
             };
@@ -224,67 +224,49 @@
             return getTimeRequest(dataMatch, from, ranges);
         }
 
+        function getLocationRequest(query, from, location) {
+             return {
+                 "from" : from ? from : 0,
+                 "size" : 20,
+                 "query": {
+                     "bool": {
+                         "must" : [
+                         {
+                          "match": {
+                               "_all": {
+                                 "query": query,
+                                 "operator": "or",
+                                 "fuzziness": 2,
+                                 "analyzer": "my_synonyms"
+                               }
+                          }
+                          },
+                          {
+                            "geo_distance": {
+                             "distance": "100km",
+                             "location": {
+                               "lat": location.latitude,
+                               "lon": location.longitude
+                             }
+                           }
+                         }
+                         ]
+                         }
+                     }
+             };
+        }
+
         function buildNearMeRequest(special, dataMatch, from) {
             var query = dataMatch.name.query.toLowerCase().replace(special.phrase, "").trim();
-            var request = {
-                "from" : from ? from : 0,
-                "size" : 20,
-                "query": {
-                    "filtered": {
-                        "query" : {
-                         "match": {
-                              "_all": {
-                                "query": query,
-                                "operator": "or",
-                                "fuzziness": 2,
-                                "analyzer": "my_synonyms"
-                              }
-                         },
-                        "filter": {
-                          "geo_distance": {
-                            "distance": "100km",
-                            "location": {
-                              "lat": locationX.latitude,
-                              "lon": locationX.longitude
-                            }
-                          }
-                        }
-                    }}
-                }
-            };
-            return request;
+
+            return getLocationRequest(query, from, locationX);
         }
 
         function buildCityRequest(special, dataMatch, from) {
             var query = dataMatch.name.query.toLowerCase().replace(special.phrase, "").trim();
-            var request = {
-                "from" : from ? from : 0,
-                "size" : 20,
-                "query": {
-                    "filtered": {
-                        "query" : {
-                         "match": {
-                              "_all": {
-                                "query": query,
-                                "operator": "or",
-                                "fuzziness": 2,
-                                "analyzer": "my_synonyms"
-                              }
-                         },
-                        "filter": {
-                          "geo_distance": {
-                            "distance": "100km",
-                            "location": {
-                              "lat": special.city.latitude,
-                              "lon": special.city.longitude
-                            }
-                          }
-                        }
-                    }}
-                }
-            };
-            return request;
+            return getLocationRequest(query, from, special.city);
         }
+
         function buildLocationRequest(special, dataMatch, from) {
             var request;
             switch(special.phrase) {
