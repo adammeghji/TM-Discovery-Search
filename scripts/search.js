@@ -157,8 +157,8 @@
             {phrase : "next month", type: RANGE_TIME},
             {phrase : "near me", type: LOCATION},
             {phrase : "in los angeles", type: LOCATION, city : { latitude:34.052235, longitude: -118.243683 }},
-            {phrase : "san francisco", type: LOCATION, city : { latitude:37.7749, longitude: -122.4194 }},
-            {phrase : "new york", type: LOCATION, city : { latitude:40.7142700, longitude: -74.0059700 }}
+            {phrase : "in san francisco", type: LOCATION, city : { latitude:37.7749, longitude: -122.4194 }},
+            {phrase : "in new york", type: LOCATION, city : { latitude:40.7142700, longitude: -74.0059700 }}
         ];
 
         function findSpecialMatch(keyword) {
