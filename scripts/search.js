@@ -1,5 +1,20 @@
 (function(){
 
+    var locationX = {
+        latitude: 0,
+        longitude: 0
+    };
+
+    navigator.geolocation.getCurrentPosition(function(response){
+        console.log(response);
+        locationX.latitude = response.coords.latitude;
+        locationX.longitude = response.coords.longitude;
+
+        console.log(locationX);
+    }, function(){
+        console.log("Can't define geolocation");
+    } );
+
     Object.byString = function(o, s) { // prototype function to return sub object from object by string path
         s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
         s = s.replace(/^\./, ''); // strip a leading dot
