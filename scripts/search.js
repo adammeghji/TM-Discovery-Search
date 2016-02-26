@@ -621,7 +621,7 @@
             self.initMap = function(selectorId, center, zoom, markers){
                 var map = new google.maps.Map(document.getElementById(selectorId), {
                     center: center,
-                    zoom: 3
+                    zoom: zoom
                 });
 
                 for (var i in markers){
@@ -719,7 +719,7 @@
                                 lat: source.location.lat,
                                 lng: source.location.lon
                             };
-                            self.initMap('js_google_map', center, 2, [center]);
+                            self.initMap('js_google_map', center, 6, [center]);
                         }
 
                         // Biography
