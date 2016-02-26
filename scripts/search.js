@@ -131,7 +131,22 @@
                 splitted = keyword.split(":"),
                 EPAM_data_match = {},
                 EPAM_data = {};
+            
+            var isNW = false;
+            
+            var splitted2 = keyword.split(" ");
+            if (splitted2.length > 1) {
+                var lastword = splitted2[splitted2.length-1];
+                if (lastword.toLowerCase() === "nextweek") {
+                    isNW = true;
+                    var lastIndex = keyword.lastIndexOf(" ");
+                    keyword = keyword.substring(0, lastIndex);
+                    splitted = keyword.split(":");
+                }
+            }
 
+            
+            
             if (splitted.length === 1){
                 EPAM_data_match = {
                     "name": {
@@ -150,19 +165,50 @@
                     "analyzer" : "my_synonyms"
                 };
             }
-            EPAM_data = {
-                "from" : from ? from : 0,
-                "size" : 20,
-                "query": {
-                    "bool": {
-                        "should": [
-                            {
-                                "match": EPAM_data_match
-                            }
-                        ]
+            
+            
+            if (isNW) {
+                EPAM_data = {
+                    "from" : from ? from : 0,
+                    "size" : 20,
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": EPAM_data_match
+                                }
+                            ],
+                            "filter": {
+                                "range": {
+                                  "dates.start.dateTime": {
+                                    "gte": "2016-02-28",
+                                    "lte": "2016-03-05"
+                                  }
+                                }
+                              }
+                        }
                     }
-                }
-            };
+                };
+                
+                
+                
+            } else {
+                EPAM_data = {
+                    "from" : from ? from : 0,
+                    "size" : 20,
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": EPAM_data_match
+                                }
+                            ]
+                        }
+                    }
+                };
+            }
+            
+            
 
             sendRequest(url, 'POST', EPAM_data, function(json){
                 //new Column(json, 'hits.hits', url, true, from ? from : 0);
