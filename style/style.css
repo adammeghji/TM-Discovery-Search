@@ -197,6 +197,15 @@
 }
 
 
+.twitter-typeahead{
+    width: 100%;
+}
+
+/* Calendar */
+.fc-day-grid-event .fc-time{
+    color: #000;
+}
+
 
 
 

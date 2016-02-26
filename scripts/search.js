@@ -234,18 +234,18 @@
                     e.preventDefault();
                     self.goToNextPage();
                 });
-                $('.js_left_list')
-                .on('dblclick', function(e){ // show modal
-                    console.log('show modal now');
-                    fillModalFromItem(e.data);
-                    $('#myModal').modal({
-                        show: 'false'
-                    });
-
-                })
-                .on('click', function(e){ // color","orange
-                    $(this).css("background-color","#f0f0f0");
-                });
+                //$('.js_left_list')
+                //.on('dblclick', function(e){ // show modal
+                //    console.log('show modal now');
+                //    fillModalFromItem(e.data);
+                //    $('#myModal').modal({
+                //        show: 'false'
+                //    });
+                //
+                //})
+                //.on('click', function(e){ // color","orange
+                //    $(this).css("background-color","#f0f0f0");
+                //});
             };
             self.goToPreviousPage = function(){ // forms url with correct previous page parameter, runs the query and builds new column with response data
                 sendRequest(self.url + '&page=' + (self.page - 1), 'GET', null, function(response){
@@ -383,6 +383,22 @@
                 return $card;
             }
 
+
+            function setCalendar($appendTo, events, defaultDate){
+                var calendar = $("<div id='calendar'></div>");
+                $appendTo.append(calendar);
+                setTimeout(function(){
+                    calendar.fullCalendar({
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title'
+                        },
+                        defaultDate: defaultDate || undefined,
+                        events: events || []
+                    })
+                }, 1);
+            }
+
             self.page = from ; //current page number (taken from json)
             self.totalPages = parseInt(json['hits']['total']); // total page number (taken from json)
             console.log('self.paging', self.page,' of ',self.totalPages , 'totalItems' );
@@ -404,6 +420,51 @@
 
                 var flickrImagesCard = getEventsFlickrImagesCard(array);
                 if(flickrImagesCard) columnRight.append(flickrImagesCard);
+
+
+                if(array.length) {
+                    var eventList = [],
+                        startDates = [];
+                    try {
+                        for (var item in array){
+                            var dates = array[item]['_source']['dates'];
+                            if(_.isObject(dates)){
+                                var event = {
+                                    title: array[item]['_source'].name,
+                                    start: dates.start.dateTime,
+                                    end: dates.end.dateTime
+                                }
+                                eventList.push(event);
+                                startDates.push(event.start);
+                            }
+                        }
+
+                        var minDate,
+                            currentDate = moment().unix();
+
+                        for (var i = 0; i < startDates.length - 1; i++) {
+                            startDates[i] = moment(startDates[i]).unix();
+                        }
+
+                        minDate = _.min(startDates);
+
+                        if(minDate < currentDate){
+                            var afterDates = [];
+                            for (var i = 0; i < startDates.length - 1; i++) {
+                                if(startDates[i] > currentDate){
+                                    afterDates.push(startDates[i]);
+                                }
+                            }
+                            minDate = _.min(afterDates);
+                        }
+
+                        if(eventList.length) setCalendar(columnRight, eventList, eventList[startDates.indexOf(minDate)].start);
+
+                    }catch (err){
+                        console.log(err);
+                    }
+                }
+
 
 
                 if(array.length){
