@@ -808,6 +808,7 @@
                 for (var item in array){
                     var source = array[item]['_source'],
                         idList = isEPAM ? source['id'] || 'undefined item' : 'not used in TM', // item info from EPAM only
+                        embedded = source['_embedded'] || undefined,
                         itemAttractions = isEPAM ? source['_embedded']['attractions'] : 'not used in TM', //override item URL
                         attractionList = [],
                         itemInfo = isEPAM ? source['info'] || 'undefined item' : 'not used in TM', // item info from EPAM only
@@ -816,7 +817,7 @@
                     //render cardSingleRight
                     if(idList === idDetail) {
 
-
+                        // Event card
                         var $eventTextCard = $("<div class='text_card'></div>"),
                             $eventTextCardBody = $('<div class="clearfix"></div>'),
                             $eventTextCardFooter = $('<div class="clearfix"></div>');
@@ -837,10 +838,27 @@
                             var eventDate =  moment(source.dates.start.dateTime).format("MM/DD/YYYY");
                             $eventTextCardFooter.append("<div class='pull-left'>" + eventDate + "</div>");
                         } catch (e) {console.log(e.message);}
+
+
+                        try {
+                            if(embedded)
+                                if(embedded.venue[0]){
+                                    var venue = embedded.venue[0],
+                                        address = '';
+
+                                    if(venue.city)
+                                        address = venue.city.name ? venue.city.name : '';
+
+                                    if(venue.address)
+                                        address = address + (venue.address.line1 ? (', ' + venue.address.line1) : '') + (venue.address.line1 ? (', ' + venue.address.line2) : '')
+
+                                    $eventTextCardFooter.append("<div class='pull-right'>" + address + "</div>");
+                                }
+                        } catch (e) {console.log(e.message);}
+
                         $eventTextCard.append($eventTextCardFooter);
-
                         responseDetailContainer.append($eventTextCard);
-
+                        // End event card
 
 
                         if (itemInfo.flickrImages) { // apend img if it exist
@@ -864,14 +882,9 @@
                                         video = '<iframe id="ytplayer" type="text/html" width="100%" height="262" src="' + src + '" frameborder="0"/>';
 
                                     responseDetailContainer.append(video);
-
-
-
-                                    console.log(itemInfo.videos[0].ids[0]);
                                 }
                             }
                         }
-
 
 
                         // Universe page
