@@ -130,7 +130,7 @@
 
                     leftColumn.append(name).append(id); // append name and id to wrapper left column
                     if (itemUrl) // apend link to TM if there is any to wrapper left column
-                        leftColumn.append($('<a target="_blank" href="' + itemUrl + '">Link to TM</div>'));
+                        leftColumn.append($('<a target="_blank" href="' + itemUrl + '" class="btn btn-primary">Buy Now</div>'));
                     listItem.append(leftColumn); // append left column to item wrapper
                     column.append(listItem); // add whole item to column
                 }
