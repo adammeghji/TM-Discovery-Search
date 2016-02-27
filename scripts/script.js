@@ -185,7 +185,7 @@ $("#fuzzy_search_keyword_EPAM").click(function () {
 
                 item.click(events[i],
                     function (eventClick) {
-
+                        console.log("Click");
                         fillModalFromItem(eventClick.data);
                         $('#myModal').modal({
                             show: 'false'
